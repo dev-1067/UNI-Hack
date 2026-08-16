@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+@theme {
+  --color-industrial-900: #0F172A;
+  --color-industrial-800: #1E293B;
+  --color-industrial-700: #334155;
+  --color-industrial-600: #475569;
+  --color-industrial-500: #64748b;
+  --color-industrial-accent: #38BDF8;
+  --color-industrial-success: #10B981;
+  --color-industrial-warning: #F59E0B;
+  --color-industrial-danger: #EF4444;
+}
+
+.light {
+  --color-industrial-900: #f8fafc;
+  --color-industrial-800: #ffffff;
+  --color-industrial-700: #e2e8f0;
+  --color-industrial-600: #cbd5e1;
+  --color-industrial-500: #94a3b8;
+  --color-industrial-accent: #0284c7;
+  color: #0f172a !important; 
+}
+
+/* Force Tailwind text colors to invert in light mode */
+.light .text-white { color: #0f172a !important; }
+.light .text-slate-200 { color: #1e293b !important; }
+.light .text-slate-300 { color: #334155 !important; }
+.light .text-slate-400 { color: #475569 !important; }
+.light .text-slate-500 { color: #64748b !important; }
+
+@layer base {
+  body {
+    @apply bg-industrial-900 text-slate-200 antialiased selection:bg-industrial-accent selection:text-white;
+  }
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  @apply bg-industrial-800/60 backdrop-blur-md border border-slate-700/50 shadow-xl rounded-xl;
+}
+
+/* Custom scrollbar for data tables */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-industrial-900;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-industrial-600 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-industrial-500;
+}
+
+/* --- Mind Blowing Animations --- */
+@keyframes laser-scan {
+  0% { top: -10%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
+}
+
+.animate-laser {
+  animation: laser-scan 3s ease-in-out infinite;
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in-up 0.5s ease-out forwards;
+  opacity: 0; /* Starts hidden until animation */
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(56, 189, 248, 0.6); }
+  100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+/* --- World-Class Ambience --- */
+.tech-grid {
+  background-size: 50px 50px;
+  background-image: 
+    linear-gradient(to right, rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+  mask-image: radial-gradient(circle at center, black, transparent 80%);
+}
+
+@keyframes modal-pop {
+  0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-modal-pop {
+  animation: modal-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* --- Replit-Style Tactile UI --- */
+.replit-transition {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition-duration: 300ms;
+}
+
+.tactile-button {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition-duration: 300ms;
+  @apply hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-95 active:shadow-sm;
+}

@@ -1,0 +1,11 @@
+langchain
+langchain-openai
+llama-parse
+tavily-python
+pydantic
+python-dotenv
+fastapi
+uvicorn
+python-multipart
+thefuzz
+Levenshtein
