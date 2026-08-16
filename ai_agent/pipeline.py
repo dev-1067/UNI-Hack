@@ -10,30 +10,31 @@ from ai_agent.extraction import extract_product_specs, ProductRecord
 # Load environment variables
 load_dotenv()
 
-# Sample List of Values (LOV) for testing
+# Sample List of Values (LOV) for testing since we lack the 161k row file
 SAMPLE_LOV = [
-    "Thread Size", "Material", "Length", "Drive Type", 
-    "Head Style", "System of Measurement", "Finish"
+    "Series", "Item Type", "Thread Size", "Material", "Length", "Drive Type", 
+    "Head Style", "System of Measurement", "Finish", "Mounting Type",
+    "Number of Wash Cycles", "Voltage Rating", "Amperage Rating", "Sound Level"
 ]
 
-def run_agent_pipeline(brand: str, part_number: str, pdf_path: str = None) -> ProductRecord:
+def run_agent_pipeline(mfg_part_num: str, part_desc: str, part_manuf: str, pdf_path: str = None) -> ProductRecord:
     """
     Orchestrates the entire Person 1 AI pipeline:
     1. Parse PDF (if provided)
     2. Exact Web Search (with cache fallback)
     3. Strict LOV Extraction
     """
-    print(f"\n🚀 Starting AI Pipeline for: {brand} - {part_number}")
+    print(f"\n🚀 Starting AI Pipeline for: {part_manuf} - {mfg_part_num}")
     print("-" * 50)
     
-    raw_text = ""
+    raw_text = part_desc + "\n"
     
     # Step 1: Ingestion
     if pdf_path:
         raw_text += parse_pdf(pdf_path) + "\n\n"
         
     # Step 4: Web Search Grounding
-    search_results = exact_web_search(part_number, brand)
+    search_results = exact_web_search(mfg_part_num, part_manuf)
     
     # Combine PDF text and Web text
     if search_results["content"]:
@@ -51,8 +52,8 @@ def run_agent_pipeline(brand: str, part_number: str, pdf_path: str = None) -> Pr
     )
     
     # Manually inject the requested metadata if the LLM missed it
-    final_record.part_number = part_number
-    final_record.brand = brand
+    final_record.part_number = mfg_part_num
+    final_record.brand = part_manuf
     
     print("\n✅ Pipeline Complete!")
     print("-" * 50)

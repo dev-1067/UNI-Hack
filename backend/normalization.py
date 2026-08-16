@@ -1,37 +1,31 @@
-from thefuzz import process
+import re
+from typing import List, Tuple
 from backend.schema import UnihackCatalogRecord
 
-# Mock list of 76+ approved manufacturers
-APPROVED_BRANDS = [
-    "Diablo", "Freud Inc", "DeWalt", "Makita", "Milwaukee", 
-    "Bosch", "3M", "Stanley", "Fastenal", "Grainger"
-]
+PLACEHOLDERS = ["-- Unbranded --", "-- No Unilog Brand --", "-- No DIB Brand --", "UNKNOWN", ""]
+
+def is_placeholder(val: str) -> bool:
+    return val.strip() in PLACEHOLDERS
 
 def normalize_brand(raw_brand: str) -> str:
     """
-    Step 2: Brand Fuzzy Matching
-    Matches a raw brand string against the approved list using fuzzy logic.
+    Filters out placeholders. If not a placeholder, returns the brand.
+    (In a full implementation, this would fuzzy match against the 27k list).
     """
-    if not raw_brand:
-        return "UNKNOWN"
-        
-    # Extract the best match using thefuzz
-    best_match, score = process.extractOne(raw_brand, APPROVED_BRANDS)
-    
-    # If the score is above a threshold, accept it. Otherwise flag it.
-    if score > 80:
-        return best_match
-    return f"REVIEW_NEEDED: {raw_brand}"
+    if is_placeholder(raw_brand):
+        return ""
+    return raw_brand.strip()
 
 def classify_product(part_number: str, text_content: str) -> tuple:
     """
     Step 3: Category Classification (3-level taxonomy)
     Returns (Dept, Class, Fine)
-    For this demo, we use basic keyword matching.
     """
     text_lower = text_content.lower()
     
-    if "sanding" in text_lower or "belt" in text_lower or "abrasive" in text_lower:
+    if "dishwasher" in text_lower:
+        return ("Appliances", "Large Appliances", "Dishwashers")
+    elif "sanding" in text_lower or "belt" in text_lower or "abrasive" in text_lower:
         return ("Power Tool Accessories", "Abrasives", "Sanding Belts")
     elif "drill" in text_lower or "bit" in text_lower:
         return ("Power Tool Accessories", "Drilling", "Drill Bits")
@@ -43,17 +37,21 @@ def classify_product(part_number: str, text_content: str) -> tuple:
 def normalize_units(attributes: list) -> dict:
     """
     Step 6: Unit & Fraction Normalization
-    Takes the raw attributes from the LLM and cleans them up.
-    Returns a dictionary of clean attributes.
+    Converts decimals to fractions (e.g. 0.5 -> 1/2)
+    Ensures space between number and unit (e.g. 24 in)
     """
     clean_attrs = {}
     for attr in attributes:
         val = attr.value
-        # Example Normalization: Convert fractions and "inch" to "in"
-        val = val.replace("inch", "in").replace("inches", "in").replace("\"", " in")
-        val = val.replace("1/2", "0.5").replace("1/4", "0.25").replace("3/4", "0.75")
+        # Decimals to fractions
+        val = val.replace("0.5", "1/2").replace("0.25", "1/4").replace("0.75", "3/4")
         
-        # Combine value and UOM
+        # Unit abbreviations
+        val = val.replace("inches", "in").replace("inch", "in").replace("IN.", "in").replace("\"", "in")
+        
+        # Ensure space before 'in' if it immediately follows a number
+        val = re.sub(r'(\d)(in)(?!\w)', r'\1 \2', val)
+        
         if attr.uom and attr.uom not in val:
             final_val = f"{val.strip()} {attr.uom.strip()}"
         else:
@@ -65,18 +63,40 @@ def normalize_units(attributes: list) -> dict:
 
 def generate_descriptions(record: UnihackCatalogRecord) -> UnihackCatalogRecord:
     """
-    Step 7: Fixed Description Templates
-    Pieces together attributes to create deterministic descriptions.
+    Step 7: Fixed Description Templates matching Content Guidelines.
     """
-    # Create a string of key attributes
-    specs_str = " | ".join([f"{k}: {v}" for k, v in record.attributes.items()][:5])
+    attrs = record.attributes
+    series = attrs.get("Series", "")
+    item_type = attrs.get("Item Type", record.fine)
     
-    base_desc = f"{record.brand} {record.part_number}"
+    # Collect key specs excluding Series
+    specs_list = [f"{k}: {v}" for k, v in attrs.items() if k != "Series"]
+    specs_str = ", ".join(specs_list[:5])
     
-    record.short_desc = f"{base_desc} - {record.class_name}"
-    record.mobile_desc = f"{base_desc} [{record.fine}]"
-    record.invoice_desc = f"{base_desc} - {specs_str}"
-    record.long_desc1 = f"Premium {record.fine} by {record.brand}. Specifications: {specs_str}."
-    record.retail_desc = record.long_desc1
+    brand_disp = record.brand if record.brand else record.manufacturer
+    mpn_disp = record.mfg_part_num if record.mfg_part_num else record.part_number
+    
+    # 1. Invoice Desc (<=40 char, CAPS)
+    # Format: ITEM_TYPE KEY_ATTRS
+    inv_base = f"{item_type} {specs_str}".upper()
+    inv_base = re.sub(r'[^\w\s\-\/]', '', inv_base) # Remove most punctuation
+    record.invoice_desc = inv_base[:40].strip()
+    
+    # 2. Mobile Desc (60-80 char)
+    # Format: Manufacturer Brand, ItemType, Series, MPN
+    mob_parts = [p for p in [record.manufacturer, record.brand, item_type, series, mpn_disp] if p]
+    mob_base = " ".join(mob_parts)
+    record.mobile_desc = mob_base[:80].strip()
+    
+    # 3. Product Title / Short Desc
+    # Format: Brand + Series + MPN + Item Type + key attributes
+    short_parts = [p for p in [brand_disp, series, mpn_disp, item_type, specs_str] if p]
+    record.short_desc = " ".join(short_parts)
+    
+    # 4. Long Description
+    record.long_desc1 = record.short_desc # simplified for now
+    
+    # 5. Retail Desc
+    record.retail_desc = record.short_desc
     
     return record

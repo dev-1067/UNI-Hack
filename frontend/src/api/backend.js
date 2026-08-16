@@ -7,12 +7,15 @@ const api = axios.create({
   }
 });
 
-export const processProduct = async (brand, partNumber, pdfPath = null) => {
+export const processProduct = async (partNum, partDesc, brand) => {
   try {
     const response = await api.post('/process', {
-      brand,
-      part_number: partNumber,
-      pdf_path: pdfPath
+      mfg_part_num: partNum,
+      part_desc: partDesc,
+      e1_brand: brand,
+      unilog_brand: brand,
+      dib_brand: brand,
+      part_manuf: brand
     });
     return response.data;
   } catch (error) {
