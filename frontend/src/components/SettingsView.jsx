@@ -38,7 +38,7 @@ const SettingsView = () => {
               <Shield className="w-5 h-5 text-industrial-success" /> Confidence Routing Rules
             </h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-industrial-900/50 rounded-lg border border-industrial-700/50">
+              <div className="flex items-center justify-between p-4 bg-industrial-900/50 rounded-sm border border-industrial-700/50">
                 <div>
                   <p className="font-bold text-white">Auto-Approve Threshold</p>
                   <p className="text-xs text-slate-400">Automatically bypass human review if confidence is higher than this value.</p>
@@ -50,7 +50,7 @@ const SettingsView = () => {
                   <option>99%</option>
                 </select>
               </div>
-              <div className="flex items-center justify-between p-4 bg-industrial-900/50 rounded-lg border border-industrial-700/50">
+              <div className="flex items-center justify-between p-4 bg-industrial-900/50 rounded-sm border border-industrial-700/50">
                 <div>
                   <p className="font-bold text-white">Strict LOV Enforcement</p>
                   <p className="text-xs text-slate-400">Flag items immediately if extracted value is not in the predefined List of Values.</p>
@@ -66,7 +66,7 @@ const SettingsView = () => {
           <div className="flex justify-end">
             <button 
               onClick={handleSave}
-              className="tactile-button flex items-center gap-2 bg-industrial-accent text-industrial-900 font-black px-8 py-3 rounded-lg shadow-[0_0_15px_rgba(56,189,248,0.2)]"
+              className="tactile-button flex items-center gap-2 bg-industrial-accent text-industrial-900 font-black px-8 py-3 rounded-sm shadow-[0_0_15px_rgba(56,189,248,0.2)]"
             >
               {saved ? <CheckCircle className="w-5 h-5" /> : <Save className="w-5 h-5" />}
               {saved ? "SETTINGS SAVED" : "SAVE CONFIGURATION"}

@@ -1,70 +1,94 @@
 import React, { useState } from 'react';
-import { Search, ShieldCheck, Bell, Moon, Sun, Activity } from 'lucide-react';
+import { RefreshCw, Bell, Sun, Moon, Activity } from 'lucide-react';
 
-const Header = ({ onOpenCommandPalette, theme, toggleTheme }) => {
+const Header = ({ activeView, theme, toggleTheme }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+
+  const viewTitles = {
+    overview:    'AI Pipeline Overview',
+    'sku-matrix':'SKU Processing Grid',
+    heatmap:     'GIS Source Heatmap',
+    analytics:   'Deep Analytics & ML',
+    reports:     'Reports',
+    settings:    'Settings',
+    help:        'Help & Docs',
+    catalogs:    'Parts Extraction Workspace',
+  };
+
+  const handleSync = () => {
+    setSyncing(true);
+    setTimeout(() => setSyncing(false), 2000);
+  };
 
   return (
-    <header className="h-16 bg-industrial-900 border-b border-industrial-800 flex items-center justify-between px-6 z-40 relative transition-colors duration-500">
-      
-      {/* Left Area: Context / Title */}
-      <div className="flex items-center gap-3">
-        <h1 className="text-lg font-bold text-white tracking-tight">AI Product Intelligence</h1>
-        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-industrial-success/10 border border-industrial-success/20">
-          <ShieldCheck className="w-3.5 h-3.5 text-industrial-success" />
-          <span className="text-[10px] font-black uppercase tracking-wider text-industrial-success">Zero-Hallucination</span>
-        </div>
+    <header className="h-14 bg-cmd-900 border-b border-white/5 flex items-center justify-between px-5 z-40 relative shrink-0">
+
+      {/* Left: Title */}
+      <div className="flex items-center gap-3 w-1/4">
+        <h2 className="text-[15px] font-bold text-white tracking-tight">
+          {viewTitles[activeView] ?? 'Dashboard'}
+        </h2>
       </div>
-      
-      {/* Center Area: Expanding Command Bar */}
-      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md hidden md:block">
-        <div 
-          onClick={onOpenCommandPalette}
-          className="relative flex items-center bg-industrial-800 border border-industrial-700 hover:border-industrial-accent hover:shadow-[0_0_20px_rgba(56,189,248,0.2)] hover:scale-[1.02] rounded-lg transition-all duration-300 ease-out cursor-pointer"
-        >
-          <Search className="absolute left-3 w-4 h-4 text-slate-400" />
-          <div className="w-full bg-transparent border-none outline-none text-sm text-slate-400 py-2.5 pl-10 pr-12">
-            Search commands, parts, or press Ctrl+K...
+
+      {/* Center: Live Batch Progress */}
+      <div className="hidden lg:flex flex-1 justify-center">
+        <div className="flex items-center gap-4 bg-cmd-800/50 border border-white/5 rounded-full px-4 py-1.5">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Batch Processing</span>
+          <div className="w-48 h-1.5 bg-cmd-900 rounded-full overflow-hidden">
+            <div className="h-full bg-accent-cyan rounded-full animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.6)]" style={{ width: '74.2%' }} />
           </div>
-          <div className="absolute right-3 flex items-center gap-1 opacity-50">
-            <kbd className="px-1.5 py-0.5 bg-industrial-900 border border-industrial-700 rounded text-[10px] text-white font-mono">Ctrl</kbd>
-            <kbd className="px-1.5 py-0.5 bg-industrial-900 border border-industrial-700 rounded text-[10px] text-white font-mono">K</kbd>
-          </div>
+          <span className="text-[11px] font-bold text-accent-cyan">742 / 1000 <span className="text-slate-500 font-normal">Enriched</span></span>
         </div>
       </div>
 
-      {/* Right Area: Actions */}
-      <div className="flex items-center gap-4 relative">
-        
-        {/* Theme Toggle */}
-        <button 
+      {/* Right: Actions */}
+      <div className="flex items-center gap-2 relative">
+
+        {/* Sync */}
+        <button
+          onClick={handleSync}
+          title="Sync with backend"
+          className="p-2 hover:bg-white/5 rounded-sm text-slate-400 hover:text-white transition-colors"
+        >
+          <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+        </button>
+
+        {/* Theme */}
+        <button
           onClick={toggleTheme}
-          className="p-2 hover:bg-industrial-800 rounded-full transition-colors text-slate-400 hover:text-white"
-          title="Toggle Light/Dark Mode"
+          title="Toggle theme"
+          className="p-2 hover:bg-white/5 rounded-sm text-slate-400 hover:text-white transition-colors"
         >
-          {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
 
-        {/* Notification Bell */}
-        <button 
+        {/* Notifications */}
+        <button
           onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-          className="relative p-2 hover:bg-industrial-800 rounded-full transition-colors text-slate-400 hover:text-white group"
+          className="relative p-2 hover:bg-white/5 rounded-sm text-slate-400 hover:text-white transition-colors"
         >
-          <Bell className="w-5 h-5 group-hover:animate-pulse" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-industrial-accent rounded-full shadow-[0_0_5px_#38BDF8]"></span>
+          <Bell className="w-4 h-4" />
+          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-accent-cyan rounded-full animate-live-dot" />
         </button>
+
+        {/* DHO-style status badge */}
+        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-status-online/10 border border-status-online/30 rounded-sm ml-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-status-online animate-live-dot" />
+          <span className="text-[11px] font-bold text-status-online tracking-wide">DHO ONLINE</span>
+        </div>
 
         {/* Notifications Dropdown */}
         {isNotificationsOpen && (
-          <div className="absolute top-full right-0 mt-2 w-72 bg-industrial-800 border border-industrial-700 shadow-2xl rounded-xl overflow-hidden animate-fade-in z-50">
-            <div className="p-3 border-b border-industrial-700 bg-industrial-900/50 flex justify-between items-center">
+          <div className="absolute top-full right-0 mt-2 w-72 bg-cmd-800 border border-white/10 shadow-2xl rounded-sm overflow-hidden animate-modal-pop z-50">
+            <div className="p-3 border-b border-white/5 bg-cmd-900/60 flex justify-between items-center">
               <span className="text-sm font-bold text-white">Notifications</span>
-              <span className="text-[10px] px-2 py-0.5 bg-industrial-accent/20 text-industrial-accent rounded-full font-bold">2 New</span>
+              <span className="text-[10px] px-2 py-0.5 bg-accent-cyan/15 text-accent-cyan rounded-full font-bold">2 New</span>
             </div>
             <div className="max-h-64 overflow-y-auto">
-              <div className="p-3 border-b border-industrial-700/50 hover:bg-industrial-700/30 transition-colors cursor-pointer flex gap-3">
-                <div className="mt-0.5 p-1.5 bg-industrial-success/20 rounded-full shrink-0">
-                  <Activity className="w-4 h-4 text-industrial-success" />
+              <div className="p-3 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer flex gap-3">
+                <div className="mt-0.5 p-1.5 bg-status-low/15 rounded-full shrink-0">
+                  <Activity className="w-3.5 h-3.5 text-status-low" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white mb-0.5">AI Engine Connected</p>
@@ -72,20 +96,19 @@ const Header = ({ onOpenCommandPalette, theme, toggleTheme }) => {
                   <p className="text-[10px] text-slate-500 mt-1 font-mono">Just now</p>
                 </div>
               </div>
-              <div className="p-3 hover:bg-industrial-700/30 transition-colors cursor-pointer flex gap-3">
-                <div className="mt-0.5 p-1.5 bg-industrial-accent/20 rounded-full shrink-0">
-                  <ShieldCheck className="w-4 h-4 text-industrial-accent" />
+              <div className="p-3 hover:bg-white/5 transition-colors cursor-pointer flex gap-3">
+                <div className="mt-0.5 p-1.5 bg-accent-cyan/10 rounded-full shrink-0">
+                  <Bell className="w-3.5 h-3.5 text-accent-cyan" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-white mb-0.5">System Boot Successful</p>
-                  <p className="text-xs text-slate-400">All neural networks initialized.</p>
+                  <p className="text-sm font-medium text-white mb-0.5">3 SKUs flagged for review</p>
+                  <p className="text-xs text-slate-400">Low confidence scores detected.</p>
                   <p className="text-[10px] text-slate-500 mt-1 font-mono">2 mins ago</p>
                 </div>
               </div>
             </div>
           </div>
         )}
-
       </div>
     </header>
   );

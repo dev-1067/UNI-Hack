@@ -94,3 +94,4 @@ async def process_product(request: ProcessRequest) -> Dict[str, Any]:
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+

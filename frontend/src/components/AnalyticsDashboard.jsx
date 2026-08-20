@@ -36,7 +36,7 @@ const AnalyticsDashboard = () => {
               style={{ animationDelay: `${idx * 100}ms` }}
             >
               <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-xl bg-industrial-900 border border-industrial-700/50 ${metric.color}`}>
+                <div className={`p-3 rounded-sm bg-industrial-900 border border-industrial-700/50 ${metric.color}`}>
                   <metric.icon className="w-6 h-6" />
                 </div>
               </div>

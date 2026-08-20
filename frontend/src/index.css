@@ -1,120 +1,391 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 @theme {
-  --color-industrial-900: #0F172A;
-  --color-industrial-800: #1E293B;
-  --color-industrial-700: #334155;
-  --color-industrial-600: #475569;
-  --color-industrial-500: #64748b;
-  --color-industrial-accent: #38BDF8;
-  --color-industrial-success: #10B981;
-  --color-industrial-warning: #F59E0B;
-  --color-industrial-danger: #EF4444;
+  /* === Core Background Palette (Dark Mode - Deep Indigo/Midnight) === */
+  --color-cmd-950:  #05050C;
+  --color-cmd-900:  #0B0B1A;
+  --color-cmd-850:  #111126;
+  --color-cmd-800:  #161633;
+  --color-cmd-750:  #1F1F40;
+  --color-cmd-700:  #292952;
+  --color-cmd-600:  #404073;
+  --color-cmd-500:  #5C5C94;
+
+  /* === Accent Palette (Vibrant Adaptive) === */
+  --color-accent-cyan:    #7C3AED; /* Violet/Purple */
+  --color-accent-cyan-d:  #6D28D9;
+  --color-accent-fuchsia: #EC4899; /* Pink */
+
+  /* === Status Colors === */
+  --color-status-critical: #EF4444;
+  --color-status-high:     #F97316;
+  --color-status-moderate: #F59E0B;
+  --color-status-low:      #10B981;
+  --color-status-online:   #22C55E;
+
+  /* === Legacy aliases === */
+  --color-industrial-900:    var(--color-cmd-900);
+  --color-industrial-800:    var(--color-cmd-800);
+  --color-industrial-700:    var(--color-cmd-700);
+  --color-industrial-600:    var(--color-cmd-600);
+  --color-industrial-500:    var(--color-cmd-500);
+  --color-industrial-accent: var(--color-accent-cyan);
+  --color-industrial-success:var(--color-status-low);
+  --color-industrial-warning:var(--color-status-moderate);
+  --color-industrial-danger: var(--color-status-critical);
+
+  --font-sans: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
+/* ===================================
+   LIGHT MODE OVERRIDES
+=================================== */
 .light {
-  --color-industrial-900: #f8fafc;
-  --color-industrial-800: #ffffff;
-  --color-industrial-700: #e2e8f0;
-  --color-industrial-600: #cbd5e1;
-  --color-industrial-500: #94a3b8;
-  --color-industrial-accent: #0284c7;
-  color: #0f172a !important; 
+  /* Colorful Light Mode Backgrounds */
+  --color-cmd-950:  #F0F4F8;
+  --color-cmd-900:  #F6F8FC;
+  --color-cmd-850:  #E8EEF5;
+  --color-cmd-800:  #FFFFFF;
+  --color-cmd-750:  #DCE4EE;
+  --color-cmd-700:  #CBD5E1;
+  --color-cmd-600:  #94A3B8;
+  --color-cmd-500:  #64748B;
+  
+  --color-industrial-900: var(--color-cmd-900);
+  --color-industrial-800: var(--color-cmd-800);
+  --color-industrial-700: var(--color-cmd-700);
+  --color-industrial-600: var(--color-cmd-600);
+  --color-industrial-500: var(--color-cmd-500);
+  --color-industrial-accent: #6D28D9;
+  
+  --color-accent-cyan: #6D28D9;
+  --color-accent-fuchsia: #DB2777;
+
+  /* Flip semantic colors for text rendering */
+  --color-white: #0F172A;
+  --color-slate-200: #1E293B;
+  --color-slate-300: #334155;
+  --color-slate-400: #475569;
+  --color-slate-500: #64748B;
+  --color-slate-600: #94A3B8;
+  --color-slate-700: #CBD5E1;
+  --color-slate-800: #E2E8F0;
+  
+  color: var(--color-white);
 }
 
-/* Force Tailwind text colors to invert in light mode */
-.light .text-white { color: #0f172a !important; }
-.light .text-slate-200 { color: #1e293b !important; }
-.light .text-slate-300 { color: #334155 !important; }
-.light .text-slate-400 { color: #475569 !important; }
-.light .text-slate-500 { color: #64748b !important; }
-
+/* ===================================
+   BASE
+=================================== */
 @layer base {
   body {
-    @apply bg-industrial-900 text-slate-200 antialiased selection:bg-industrial-accent selection:text-white;
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+    @apply bg-cmd-900 text-slate-200 antialiased;
+  }
+
+  * { box-sizing: border-box; }
+
+  ::selection {
+    background: rgba(99,102,241,0.3);
+    color: #fff;
   }
 }
 
-/* Glassmorphism utility */
+/* ===================================
+   SCROLLBAR
+=================================== */
+::-webkit-scrollbar        { width: 5px; height: 5px; }
+::-webkit-scrollbar-track  { background: var(--color-cmd-900); }
+::-webkit-scrollbar-thumb  { background: var(--color-cmd-600); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-cmd-500); }
+
+/* ===================================
+   LAYOUT UTILITIES
+=================================== */
 .glass-panel {
-  @apply bg-industrial-800/60 backdrop-blur-md border border-slate-700/50 shadow-xl rounded-xl;
+  background: color-mix(in oklab, var(--color-cmd-800) 80%, transparent);
+  backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in oklab, var(--color-accent-cyan) 20%, transparent);
+  border-radius: 4px;
+  box-shadow: 0 8px 32px color-mix(in oklab, var(--color-cmd-950) 40%, transparent);
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-/* Custom scrollbar for data tables */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  @apply bg-industrial-900;
-}
-::-webkit-scrollbar-thumb {
-  @apply bg-industrial-600 rounded-full;
-}
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-industrial-500;
+.glass-panel:hover {
+  border-color: color-mix(in oklab, var(--color-accent-cyan) 40%, transparent);
+  box-shadow: 0 8px 32px color-mix(in oklab, var(--color-accent-cyan) 15%, transparent);
 }
 
-/* --- Mind Blowing Animations --- */
-@keyframes laser-scan {
-  0% { top: -10%; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { top: 110%; opacity: 0; }
+.light .glass-panel {
+  background: color-mix(in oklab, var(--color-cmd-800) 90%, transparent) !important;
+  border-color: color-mix(in oklab, var(--color-cmd-700) 50%, transparent) !important;
+  box-shadow: 0 4px 20px color-mix(in oklab, var(--color-accent-cyan) 8%, transparent) !important;
 }
 
-.animate-laser {
-  animation: laser-scan 3s ease-in-out infinite;
+.light .glass-panel:hover {
+  border-color: color-mix(in oklab, var(--color-accent-cyan) 30%, transparent) !important;
 }
+
+.glass-panel-dark {
+  background: color-mix(in oklab, var(--color-cmd-900) 90%, transparent);
+  backdrop-filter: blur(20px);
+  border: 1px solid color-mix(in oklab, var(--color-white) 8%, transparent);
+  border-radius: 4px;
+}
+
+.light .glass-panel-dark {
+  background: color-mix(in oklab, var(--color-cmd-900) 95%, transparent) !important;
+  border-color: color-mix(in oklab, var(--color-cmd-700) 40%, transparent) !important;
+}
+
+.sidebar-item-active {
+  background: rgba(99,102,241,0.12);
+  border-left: 3px solid #6366F1;
+  color: #6366F1;
+}
+.light .sidebar-item-active {
+  background: rgba(79, 70, 229, 0.1);
+  border-left-color: #4F46E5;
+  color: #4F46E5 !important;
+}
+
+.sidebar-item {
+  border-left: 3px solid transparent;
+}
+.light .sidebar-item:hover {
+  background: rgba(0,0,0,0.04);
+}
+
+/* ===================================
+   STATUS BADGES
+=================================== */
+.badge-critical {
+  background: rgba(196,30,58,0.2);
+  color: #F87171;
+  border: 1px solid rgba(196,30,58,0.4);
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.badge-high {
+  background: rgba(232,93,4,0.2);
+  color: #FB923C;
+  border: 1px solid rgba(232,93,4,0.4);
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.badge-moderate {
+  background: rgba(245,158,11,0.2);
+  color: #FBBF24;
+  border: 1px solid rgba(245,158,11,0.4);
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.badge-low {
+  background: rgba(16,185,129,0.2);
+  color: #34D399;
+  border: 1px solid rgba(16,185,129,0.4);
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.light .badge-critical { color: #dc2626; border-color: rgba(220,38,38,0.3); background: rgba(220,38,38,0.1); }
+.light .badge-high { color: #ea580c; border-color: rgba(234,88,12,0.3); background: rgba(234,88,12,0.1); }
+.light .badge-moderate { color: #d97706; border-color: rgba(217,119,6,0.3); background: rgba(217,119,6,0.1); }
+.light .badge-low { color: #059669; border-color: rgba(5,150,105,0.3); background: rgba(5,150,105,0.1); }
+
+/* ===================================
+   RISK PULSE BAR (Status Bar)
+=================================== */
+.pulse-bar-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: filter 0.2s;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pulse-bar-segment:hover {
+  filter: brightness(1.15);
+}
+.light .pulse-bar-segment {
+  color: white !important; /* Keep text white on bright backgrounds */
+}
+
+/* ===================================
+   TECH GRID BACKGROUND
+=================================== */
+.tech-grid {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right,  color-mix(in oklab, var(--color-accent-cyan) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--color-accent-cyan) 6%, transparent) 1px, transparent 1px);
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 90%);
+}
+.light .tech-grid {
+  background-image:
+    linear-gradient(to right,  color-mix(in oklab, var(--color-accent-cyan) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--color-accent-cyan) 8%, transparent) 1px, transparent 1px) !important;
+}
+
+/* ===================================
+   ANIMATIONS
+=================================== */
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes slide {
+    0% { transform: translateX(-150%) skewX(-20deg); }
+    100% { transform: translateX(250%) skewX(-20deg); }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.4s ease-out forwards;
+    opacity: 0;
+  }
 
 @keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.animate-fade-in {
-  animation: fade-in-up 0.5s ease-out forwards;
-  opacity: 0; /* Starts hidden until animation */
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in {
+  animation: slide-in-left 0.4s ease-out forwards;
+  opacity: 0;
 }
 
 @keyframes pulse-glow {
-  0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
-  50% { box-shadow: 0 0 25px rgba(56, 189, 248, 0.6); }
-  100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
+  0%   { box-shadow: 0 0 8px  rgba(56,189,248,0.2); }
+  50%  { box-shadow: 0 0 22px rgba(56,189,248,0.55); }
+  100% { box-shadow: 0 0 8px  rgba(56,189,248,0.2); }
 }
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s infinite;
-}
-
-/* --- World-Class Ambience --- */
-.tech-grid {
-  background-size: 50px 50px;
-  background-image: 
-    linear-gradient(to right, rgba(56, 189, 248, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
-  mask-image: radial-gradient(circle at center, black, transparent 80%);
-}
+.animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
 
 @keyframes modal-pop {
-  0% { opacity: 0; transform: scale(0.95) translateY(10px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
+  0%   { opacity: 0; transform: scale(0.94) translateY(10px); }
+  100% { opacity: 1; transform: scale(1)    translateY(0); }
+}
+.animate-modal-pop { animation: modal-pop 0.3s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
+
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.animate-spin-slow { animation: spin-slow 3s linear infinite; }
+
+@keyframes live-dot {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+.animate-live-dot { animation: live-dot 1.4s ease-in-out infinite; }
+
+@keyframes bar-grow {
+  from { width: 0%; }
+  to   { width: var(--bar-w); }
+}
+.animate-bar { animation: bar-grow 1s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(6px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0)  scale(1); }
+}
+.animate-count { animation: count-up 0.6s ease-out forwards; }
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.animate-shimmer {
+  background: linear-gradient(90deg, #1E2D42 25%, #263348 50%, #1E2D42 75%);
+  background-size: 200% auto;
+  animation: shimmer 1.5s linear infinite;
 }
 
-.animate-modal-pop {
-  animation: modal-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-/* --- Replit-Style Tactile UI --- */
-.replit-transition {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  transition-duration: 300ms;
-}
-
+/* ===================================
+   TACTILE BUTTON
+=================================== */
 .tactile-button {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  transition-duration: 300ms;
-  @apply hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-95 active:shadow-sm;
+  transition: all 0.25s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.tactile-button:hover  { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+.tactile-button:active { transform: translateY(0) scale(0.96); }
+
+/* ===================================
+   REPLIT TRANSITION
+=================================== */
+.replit-transition {
+  transition: all 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+
+/* ===================================
+   TABLE STYLES
+=================================== */
+.cmd-table th {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #64748b;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(56,189,248,0.1);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+.cmd-table th:hover { color: #94a3b8; }
+.cmd-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 13px;
+}
+.cmd-table tr:hover td { background: rgba(56,189,248,0.03); }
+
+.light .cmd-table th { border-bottom-color: rgba(0,0,0,0.1); color: #64748b; }
+.light .cmd-table th:hover { color: #475569; }
+.light .cmd-table td { border-bottom-color: rgba(0,0,0,0.06); }
+.light .cmd-table tr:hover td { background: rgba(0,0,0,0.02); }
+
+/* ===================================
+   LASER SCAN (for splash/processing)
+=================================== */
+@keyframes laser-scan {
+  0%   { top: -5%;  opacity: 0; }
+  5%   { opacity: 0.8; }
+  95%  { opacity: 0.8; }
+  100% { top: 105%; opacity: 0; }
+}
+.animate-laser {
+  animation: laser-scan 2.5s ease-in-out infinite;
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #38BDF8, transparent);
 }
