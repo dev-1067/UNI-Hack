@@ -51,7 +51,11 @@ function App() {
   const handleProcessAI = async () => {
     setIsProcessing(true);
     try {
-      const result = await processProduct("Diablo", "DCB518ASTS06G");
+      const result = await processProduct(
+        "DCB518ASTS06G", 
+        "Diablo Steel Demon 5-3/8 in. x 50-Teeth Thick Metal Cutting Saw Blade", 
+        "Diablo"
+      );
       setAiData(result);
     } catch (error) {
       alert("Backend not reachable. Ensure FastAPI is running on port 8000.");

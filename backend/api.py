@@ -2,10 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 
-# Person 1's pipeline
 from ai_agent.pipeline import run_agent_pipeline
-
-# Person 2's components
 from backend.schema import UnihackCatalogRecord, export_to_252_columns
 from backend.normalization import (
     normalize_brand, 
@@ -22,18 +19,21 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for the React Frontend (typically runs on port 5173 or 3000)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # For hackathon demo purposes, allow all origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 class ProcessRequest(BaseModel):
-    part_number: str
-    brand: str
+    mfg_part_num: str
+    part_desc: str
+    e1_brand: str = ""
+    unilog_brand: str = ""
+    dib_brand: str = ""
+    part_manuf: str = ""
     pdf_path: Optional[str] = None
 
 @app.post("/api/process", summary="Process a product into a 252-column CSV record")
@@ -41,11 +41,11 @@ async def process_product(request: ProcessRequest) -> Dict[str, Any]:
     """
     Main endpoint that orchestrates the entire 7-step pipeline.
     """
-    # 1. Run the AI Pipeline (Ingestion, Web Search, Extraction)
     try:
         raw_ai_record = run_agent_pipeline(
-            brand=request.brand, 
-            part_number=request.part_number, 
+            mfg_part_num=request.mfg_part_num,
+            part_desc=request.part_desc,
+            part_manuf=request.part_manuf,
             pdf_path=request.pdf_path
         )
     except Exception as e:
@@ -54,36 +54,39 @@ async def process_product(request: ProcessRequest) -> Dict[str, Any]:
     if not raw_ai_record:
         raise HTTPException(status_code=404, detail="No data could be extracted.")
 
-    # 2. Map and Normalize the data into the structured schema
-    
-    # Step 2: Brand Fuzzy Matching
-    clean_brand = normalize_brand(raw_ai_record.brand)
-    
-    # Step 3: Category Classification (Mocked based on raw text - for a real app, pass the full text)
-    dept, class_name, fine = classify_product(
-        part_number=raw_ai_record.part_number, 
-        text_content=str(raw_ai_record.attributes)
-    )
-    
-    # Step 6: Unit Normalization
-    clean_attributes = normalize_units(raw_ai_record.attributes)
-    
-    # Create the base Unihack record
+    # 1. Base initialization from Request and AI Record
     record = UnihackCatalogRecord(
-        E1_Brand=clean_brand,
-        Part_Number=raw_ai_record.part_number,
-        Department=dept,
-        Class=class_name,
-        Fine=fine,
         MFR_URL=raw_ai_record.ref_url,
         Ref_URL_1=raw_ai_record.ref_url,
-        attributes=clean_attributes
+        PART_NUMBER=request.mfg_part_num,
+        Mfg_Part_Num=request.mfg_part_num,
+        Part_Desc=request.part_desc
     )
     
-    # Step 7: Fixed Description Templates
+    # 2. Brand Normalization
+    # Determine the best brand string to use (fallback logic)
+    raw_brand = request.e1_brand if request.e1_brand and request.e1_brand != "-- Unbranded --" else request.part_manuf
+    clean_brand = normalize_brand(raw_brand)
+    record.brand = clean_brand
+    record.manufacturer = normalize_brand(request.part_manuf)
+    
+    # 3. Category Classification
+    dept, class_name, fine = classify_product(
+        part_number=request.mfg_part_num, 
+        text_content=f"{request.part_desc} {str(raw_ai_record.attributes)}"
+    )
+    record.dept = dept
+    record.class_name = class_name
+    record.fine = fine
+    
+    # 4. Unit Normalization
+    clean_attributes = normalize_units(raw_ai_record.attributes)
+    record.attributes = clean_attributes
+    
+    # 5. Fixed Description Templates
     record = generate_descriptions(record)
     
-    # 3. Export to the 252-column format
+    # 6. Export to 252-column format
     final_output = export_to_252_columns(record)
     
     return final_output
