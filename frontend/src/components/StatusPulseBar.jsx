@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
 import { Layers } from 'lucide-react';
-
-const segments = [
-  { key: 'flagged',    label: 'Flagged',         count: 5,  pct: '13.9%', color: '#EF4444', textColor: '#fff' },
-  { key: 'low-conf',  label: 'Low Confidence',  count: 9,  pct: '25.0%', color: '#F97316', textColor: '#fff' },
-  { key: 'processing',label: 'Processing',       count: 10, pct: '27.8%', color: '#F59E0B', textColor: '#fff' },
-  { key: 'verified',  label: 'Verified',         count: 12, pct: '33.3%', color: '#10B981', textColor: '#fff' },
-];
+import { useBatch } from '../context/BatchContext';
 
 const StatusVerticalStack = ({ onFilter }) => {
   const [active, setActive] = useState(null);
+  const { batchStats } = useBatch();
 
   const handleClick = (key) => {
     const next = active === key ? null : key;
     setActive(next);
     if (onFilter) onFilter(next);
   };
+
+  const segments = [
+    { key: 'flagged',    label: 'Flagged',         count: batchStats.flagged,  pct: ((batchStats.flagged / batchStats.totalSkus) * 100).toFixed(1) + '%', color: '#EF4444', textColor: '#fff' },
+    { key: 'low-conf',  label: 'Low Confidence',  count: batchStats.lowConf,  pct: ((batchStats.lowConf / batchStats.totalSkus) * 100).toFixed(1) + '%', color: '#F97316', textColor: '#fff' },
+    { key: 'processing',label: 'Processing',       count: batchStats.processing, pct: ((batchStats.processing / batchStats.totalSkus) * 100).toFixed(1) + '%', color: '#F59E0B', textColor: '#fff' },
+    { key: 'verified',  label: 'Verified',         count: batchStats.verified, pct: ((batchStats.verified / batchStats.totalSkus) * 100).toFixed(1) + '%', color: '#10B981', textColor: '#fff' },
+  ];
 
   return (
     <div className="glass-panel p-5 animate-fade-in mb-4">
@@ -27,7 +29,7 @@ const StatusVerticalStack = ({ onFilter }) => {
       {/* Total */}
       <div className="flex items-center justify-between bg-cmd-800 border border-white/5 rounded-sm p-3 mb-4">
         <p className="text-[11px] text-slate-500 uppercase font-bold">Total Batch Size</p>
-        <p className="text-xl font-black text-white">36 <span className="text-[10px] text-slate-400 font-normal">SKUs</span></p>
+        <p className="text-xl font-black text-white">{batchStats.totalSkus} <span className="text-[10px] text-slate-400 font-normal">SKUs</span></p>
       </div>
 
       <div className="space-y-2">

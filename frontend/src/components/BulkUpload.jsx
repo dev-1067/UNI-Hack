@@ -7,10 +7,23 @@ const BulkUpload = ({ setActiveView }) => {
   const [fileName, setFileName] = useState('');
   const fileInputRef = useRef(null);
 
+  const [recentUploads, setRecentUploads] = useState([
+    { id: 1, name: 'diablo_blades_q3_specs.pdf', status: 'Complete', time: '10 mins ago' },
+    { id: 2, name: 'makita_tools_catalog_2026.csv', status: 'Complete', time: '2 hours ago' },
+    { id: 3, name: 'bosch_power_drills_spec.pdf', status: 'Processing', time: '4 hours ago' }
+  ]);
+
   const handleProcessFile = (name) => {
     setFileName(name);
     setUploadState('uploading');
-    setTimeout(() => setUploadState('complete'), 3000);
+    
+    const newId = Date.now();
+    setRecentUploads(prev => [{ id: newId, name, status: 'Processing', time: 'Just now' }, ...prev]);
+
+    setTimeout(() => {
+      setUploadState('complete');
+      setRecentUploads(prev => prev.map(u => u.id === newId ? { ...u, status: 'Complete' } : u));
+    }, 3000);
   };
 
   const handleDrop = (e) => {
@@ -48,7 +61,7 @@ const BulkUpload = ({ setActiveView }) => {
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
-          className={`glass-panel border-2 border-dashed rounded-sm p-12 text-center transition-all ${isDragging ? 'border-accent-cyan bg-accent-cyan/5 scale-105' : 'border-white/20 hover:border-accent-cyan/50'}`}
+          className={`glass-panel border-2 border-dashed rounded-sm p-12 text-center transition-all mb-8 ${isDragging ? 'border-accent-cyan bg-accent-cyan/5 scale-105' : 'border-white/20 hover:border-accent-cyan/50'}`}
         >
           {uploadState === 'idle' && (
             <div className="animate-fade-in">
@@ -86,6 +99,27 @@ const BulkUpload = ({ setActiveView }) => {
               </button>
             </div>
           )}
+        </div>
+
+        {/* Recent Uploads Section */}
+        <div className="glass-panel p-6 animate-fade-in">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4">Recent Uploads</h3>
+          <div className="space-y-3">
+            {recentUploads.map((item) => (
+              <div key={item.id} className="flex items-center justify-between p-3 bg-cmd-900/50 border border-white/5 rounded-sm hover:bg-white/5 transition-colors">
+                <div className="flex items-center gap-3">
+                  <FileText className="w-4 h-4 text-slate-400" />
+                  <div>
+                    <p className="text-sm font-bold text-white">{item.name}</p>
+                    <p className="text-xs text-slate-500">{item.time}</p>
+                  </div>
+                </div>
+                <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${item.status === 'Complete' ? 'bg-industrial-success/20 text-industrial-success' : 'bg-status-moderate/20 text-status-moderate animate-pulse'}`}>
+                  {item.status}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

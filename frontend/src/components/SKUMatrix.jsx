@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowUpDown, ArrowUp, ArrowDown, Search, Download, LayoutGrid, List } from 'lucide-react';
+import { useBatch } from '../context/BatchContext';
 
 const allData = [
   { sku: 'DCB518ASTS06G', brand: 'Diablo Tools', status: 'FLAGGED',   score: 62.5, cases: 1245, velocity: '+12.5%', category: 'Saw Blades',       rain: 'PDF Spec', staff: 845 },
@@ -51,6 +52,7 @@ const SortIcon = ({ field, sortField, dir }) => {
 };
 
 const SKUMatrix = () => {
+  const { batchStats } = useBatch();
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState('score');
   const [sortDir, setSortDir] = useState('asc');
@@ -115,7 +117,7 @@ const SKUMatrix = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-5 gap-4">
           <div>
             <h2 className="text-xl font-black text-white">Product Extraction Catalog</h2>
-            <p className="text-[12px] text-slate-500 mt-0.5">Interactive catalog of {filtered.length} extracted items.</p>
+            <p className="text-[12px] text-slate-500 mt-0.5">Interactive catalog of {batchStats.totalSkus} extracted items (showing {filtered.length}).</p>
           </div>
           <div className="flex gap-3 items-center">
             {/* Export CSV */}

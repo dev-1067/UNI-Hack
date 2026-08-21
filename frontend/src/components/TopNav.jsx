@@ -12,7 +12,7 @@ const TopNav = ({ activeView, setActiveView, onLogout, theme, toggleTheme }) => 
     { id: 'sku-matrix',   icon: Table2,          label: 'SKU Matrix' },
     { id: 'review-queue', icon: Layers,          label: 'Review Queue' },
     { id: 'bulk-upload',  icon: FileText,        label: 'Bulk Upload' },
-    { id: 'api-hub',      icon: Wifi,            label: 'API Hub' },
+
     { id: 'heatmap',      icon: Map,             label: 'Heatmap' },
     { id: 'analytics',    icon: TrendingUp,      label: 'Analytics' },
   ];

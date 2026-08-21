@@ -10,8 +10,7 @@ const tabs = [
 
 const TopTabBar = ({ activeView, setActiveView }) => {
   const scrollRef = useRef(null);
-  const [lang, setLang] = useState('EN');
-  const langs = ['EN', 'MR', 'HI'];
+
 
   const scroll = (dir) => {
     if (scrollRef.current) {
@@ -78,23 +77,7 @@ const TopTabBar = ({ activeView, setActiveView }) => {
         Guided Tour
       </button>
 
-      {/* Language Switcher */}
-      <div className="flex items-stretch border-l border-white/5 shrink-0">
-        {langs.map((l) => (
-          <button
-            key={l}
-            onClick={() => setLang(l)}
-            className={`
-              px-3 text-[12px] font-bold transition-colors
-              ${lang === l
-                ? 'text-white bg-white/8'
-                : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}
-            `}
-          >
-            {l}
-          </button>
-        ))}
-      </div>
+
 
       {/* Medical Guidelines RAG equivalent */}
       <div className="flex items-stretch border-l border-white/5 shrink-0">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Key, Shield, Save, CheckCircle } from 'lucide-react';
+import { Key, Shield, Save, CheckCircle, Cpu } from 'lucide-react';
 
 const SettingsView = () => {
   const [saved, setSaved] = useState(false);
@@ -15,19 +15,32 @@ const SettingsView = () => {
         <h1 className="text-3xl font-black text-white tracking-tight mb-6">System Settings</h1>
         
         <div className="space-y-6">
-          {/* API Configuration */}
+          {/* AI Engine Configuration */}
           <div className="glass-panel p-6">
             <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Key className="w-5 h-5 text-industrial-accent" /> API Configuration
+              <Cpu className="w-5 h-5 text-industrial-accent" /> AI Engine Configuration
             </h2>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-400 mb-1">OpenAI API Key (GPT-4o)</label>
-                <input type="password" defaultValue="sk-proj-xxxxxxxxxxxxxxxxxxxxxxxx" className="w-full bg-industrial-900 border border-industrial-700 rounded px-4 py-2 text-white focus:outline-none focus:border-industrial-accent" />
+              <div className="flex items-center justify-between p-4 bg-industrial-900/50 rounded-sm border border-industrial-700/50">
+                <div>
+                  <p className="font-bold text-white">Primary Extraction Model</p>
+                  <p className="text-xs text-slate-400">Select the underlying Vision-Language Model for OCR and attribute parsing.</p>
+                </div>
+                <select className="bg-industrial-800 border border-industrial-600 text-white rounded px-3 py-1 outline-none">
+                  <option>GPT-4o (Default)</option>
+                  <option>Claude 3.5 Sonnet</option>
+                  <option>Gemini 1.5 Pro</option>
+                </select>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-400 mb-1">LlamaParse API Key</label>
-                <input type="password" defaultValue="llx-xxxxxxxxxxxxxxxxxxxxxxxx" className="w-full bg-industrial-900 border border-industrial-700 rounded px-4 py-2 text-white focus:outline-none focus:border-industrial-accent" />
+              <div className="flex items-center justify-between p-4 bg-industrial-900/50 rounded-sm border border-industrial-700/50">
+                <div>
+                  <p className="font-bold text-white">Processing Mode</p>
+                  <p className="text-xs text-slate-400">Trade-off between processing speed and extraction accuracy.</p>
+                </div>
+                <select className="bg-industrial-800 border border-industrial-600 text-white rounded px-3 py-1 outline-none">
+                  <option>High Speed (Batch)</option>
+                  <option>High Accuracy (Deep Scan)</option>
+                </select>
               </div>
             </div>
           </div>

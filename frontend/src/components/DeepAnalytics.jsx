@@ -3,13 +3,13 @@ import { Activity, TrendingUp, Zap, Target, Brain } from 'lucide-react';
 
 /* ── Animated Bar Chart ── */
 const BarChart = ({ data, colors, labels, height = 140 }) => {
-  const max = Math.max(...data);
-  const refs = useRef([]);
+  const max = Math.max(...data, 1);
+  const [mounted, setMounted] = useState(false);
+  
   useEffect(() => {
-    refs.current.forEach((el, i) => {
-      if (el) setTimeout(() => { el.style.height = `${(data[i] / max) * 100}%`; }, 100 + i * 60);
-    });
-  }, [data, max]);
+    const t = setTimeout(() => setMounted(true), 100);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <div className="flex items-end gap-1.5 w-full" style={{ height }}>
@@ -18,9 +18,8 @@ const BarChart = ({ data, colors, labels, height = 140 }) => {
           <div className="w-full relative flex-1 flex items-end">
             <div className="w-full bg-cmd-800 rounded-t-sm relative overflow-hidden" style={{ height: '100%' }}>
               <div
-                ref={el => refs.current[i] = el}
                 className="absolute bottom-0 left-0 right-0 rounded-t-sm transition-all duration-700 ease-out"
-                style={{ height: '0%', background: colors?.[i] ?? '#38BDF8', opacity: 0.85 }}
+                style={{ height: mounted ? `${(v / max) * 100}%` : '0%', background: colors?.[i] ?? '#38BDF8', opacity: 0.85 }}
               />
             </div>
           </div>
@@ -48,10 +47,18 @@ const Sparkline = ({ data, color = '#38BDF8', height = 60 }) => {
   );
 };
 
-/* ── Radial Gauge ── */
+/* ── RadialGauge ── */
 const RadialGauge = ({ pct, color, label, value }) => {
   const r = 40, circ = 2 * Math.PI * r;
-  const dash = (pct / 100) * circ;
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 100);
+    return () => clearTimeout(t);
+  }, []);
+
+  const dash = mounted ? (pct / 100) * circ : 0;
+  
   return (
     <div className="flex flex-col items-center">
       <svg width="100" height="100" viewBox="0 0 100 100">
@@ -61,7 +68,7 @@ const RadialGauge = ({ pct, color, label, value }) => {
           transform="rotate(-90 50 50)"
           style={{ transition: 'stroke-dasharray 1.2s cubic-bezier(.22,1,.36,1)' }}
         />
-        <text x="50" y="54" textAnchor="middle" fill="white" fontSize="16" fontWeight="900">{value}</text>
+        <text x="50" y="54" textAnchor="middle" fill="white" fontSize="16" fontWeight="900">{mounted ? value : '0%'}</text>
       </svg>
       <p className="text-[11px] text-slate-400 mt-1 text-center">{label}</p>
     </div>
@@ -74,13 +81,17 @@ const throughput = [40, 60, 55, 80, 70, 90, 85];
 const lovData    = [88, 91, 95, 93, 97, 96, 98];
 const latData    = [420, 380, 350, 310, 290, 270, 312];
 
+import { useBatch } from '../context/BatchContext';
+
 const statusColors = ['#C41E3A','#E85D04','#F59E0B','#10B981'];
 const statusLabels = ['Flagged','Low-Conf','Processing','Verified'];
-const statusData   = [5, 9, 10, 12];
 
 const DeepAnalytics = () => {
+  const { batchStats } = useBatch();
   const [tab, setTab] = useState('accuracy');
   const [timeRange, setTimeRange] = useState('7D');
+
+  const statusData = [batchStats.flagged, batchStats.lowConf, batchStats.processing, batchStats.verified];
 
   const tabs = [
     { id: 'accuracy',   label: 'Accuracy Trends' },

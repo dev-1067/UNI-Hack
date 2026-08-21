@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { RefreshCw, Bell, Sun, Moon, Activity } from 'lucide-react';
+import { useBatch } from '../context/BatchContext';
 
 const Header = ({ activeView, theme, toggleTheme }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const { batchStats } = useBatch();
 
   const viewTitles = {
     overview:    'AI Pipeline Overview',
@@ -21,6 +23,8 @@ const Header = ({ activeView, theme, toggleTheme }) => {
     setTimeout(() => setSyncing(false), 2000);
   };
 
+  const progressPercentage = Math.round((batchStats.enrichedCount / batchStats.totalSkus) * 100) || 0;
+
   return (
     <header className="h-14 bg-cmd-900 border-b border-white/5 flex items-center justify-between px-5 z-40 relative shrink-0">
 
@@ -36,9 +40,9 @@ const Header = ({ activeView, theme, toggleTheme }) => {
         <div className="flex items-center gap-4 bg-cmd-800/50 border border-white/5 rounded-full px-4 py-1.5">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Batch Processing</span>
           <div className="w-48 h-1.5 bg-cmd-900 rounded-full overflow-hidden">
-            <div className="h-full bg-accent-cyan rounded-full animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.6)]" style={{ width: '74.2%' }} />
+            <div className="h-full bg-accent-cyan rounded-full animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.6)]" style={{ width: `${progressPercentage}%` }} />
           </div>
-          <span className="text-[11px] font-bold text-accent-cyan">742 / 1000 <span className="text-slate-500 font-normal">Enriched</span></span>
+          <span className="text-[11px] font-bold text-accent-cyan">{batchStats.enrichedCount} / {batchStats.totalSkus} <span className="text-slate-500 font-normal">Enriched</span></span>
         </div>
       </div>
 

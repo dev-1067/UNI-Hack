@@ -16,7 +16,7 @@ import SplashScreen from './components/SplashScreen';
 import LoginView from './components/LoginView';
 import ReviewQueue from './components/ReviewQueue';
 import BulkUpload from './components/BulkUpload';
-import APIHub from './components/APIHub';
+
 import { processProduct } from './api/backend';
 import { Bot, Network } from 'lucide-react';
 
@@ -73,7 +73,7 @@ function App() {
   const handleLogout  = () => { setIsAuthenticated(false); setActiveView('overview'); };
 
   /* ── Views that live inside the TopTabBar area ── */
-  const tabViews = new Set(['overview', 'sku-matrix', 'heatmap', 'analytics', 'review-queue', 'bulk-upload', 'api-hub']);
+  const tabViews = new Set(['overview', 'sku-matrix', 'heatmap', 'analytics', 'review-queue', 'bulk-upload']);
 
   /* ── Render the active view ── */
   const renderView = () => {
@@ -87,7 +87,7 @@ function App() {
       case 'help':         return <HelpDocsView setActiveView={setActiveView} />;
       case 'review-queue': return <ReviewQueue setActiveView={setActiveView} />;
       case 'bulk-upload':  return <BulkUpload setActiveView={setActiveView} />;
-      case 'api-hub':      return <APIHub setActiveView={setActiveView} />;
+
       case 'catalogs':
       default:
         return (

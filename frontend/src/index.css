@@ -2,15 +2,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 @theme {
-  /* === Core Background Palette (Dark Mode - Deep Indigo/Midnight) === */
-  --color-cmd-950:  #05050C;
-  --color-cmd-900:  #0B0B1A;
-  --color-cmd-850:  #111126;
-  --color-cmd-800:  #161633;
-  --color-cmd-750:  #1F1F40;
-  --color-cmd-700:  #292952;
-  --color-cmd-600:  #404073;
-  --color-cmd-500:  #5C5C94;
+  /* === Core Background Palette (Dark Mode - Chrome/Windows Neutral Grey) === */
+  --color-cmd-950:  #141517;
+  --color-cmd-900:  #202124;
+  --color-cmd-850:  #252629;
+  --color-cmd-800:  #292A2D;
+  --color-cmd-750:  #2E2F32;
+  --color-cmd-700:  #35363A;
+  --color-cmd-600:  #3C4043;
+  --color-cmd-500:  #5F6368;
 
   /* === Accent Palette (Vibrant Adaptive) === */
   --color-accent-cyan:    #7C3AED; /* Violet/Purple */

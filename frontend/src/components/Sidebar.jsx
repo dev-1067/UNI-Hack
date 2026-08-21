@@ -33,12 +33,7 @@ const Sidebar = ({ activeView, setActiveView, onLogout }) => {
       label: 'Bulk Upload',
       sub: 'OCR & VLM Document Ingestion',
     },
-    {
-      id: 'api-hub',
-      icon: Wifi,
-      label: 'API Hub',
-      sub: 'Distributor Integration Keys',
-    },
+
     {
       id: 'heatmap',
       icon: Map,
@@ -156,7 +151,7 @@ const Sidebar = ({ activeView, setActiveView, onLogout }) => {
               </button>
               <button onClick={() => { setActiveView('help'); setIsProfileMenuOpen(false); }}
                 className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-sm flex items-center gap-2 transition-colors">
-                <HelpCircle className="w-3.5 h-3.5" /> FAQ & Support
+                <HelpCircle className="w-3.5 h-3.5" /> Support
               </button>
               <div className="h-px bg-white/5 my-1 mx-2" />
               <button onClick={onLogout}

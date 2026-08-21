@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Package, ShieldCheck, Clock, TrendingUp,
   AlertTriangle, ArrowUpRight, MapPin,
-  Thermometer, Wind, Droplets, CloudRain, ExternalLink
+  Thermometer, Wind, Droplets, CloudRain, ExternalLink, Download
 } from 'lucide-react';
 import StatusVerticalStack from './StatusPulseBar';
 
@@ -88,6 +88,9 @@ const OverviewDashboard = ({ setActiveView }) => {
             </div>
           </div>
           <div className="flex gap-2">
+            <button className="px-4 py-2 rounded-sm bg-cmd-800 border border-white/10 hover:border-accent-cyan/50 hover:bg-white/5 text-white text-[12px] font-bold tracking-widest uppercase flex items-center gap-2 transition-colors">
+              <Download className="w-4 h-4 text-accent-cyan" /> Export Enriched Catalog
+            </button>
             <div className="px-4 py-2 rounded-sm bg-accent-cyan text-white text-[12px] font-bold tracking-widest uppercase shadow-[0_0_20px_rgba(124,58,237,0.4)] flex items-center gap-2">
               <Wind className="w-4 h-4" /> Pipeline Running
             </div>
