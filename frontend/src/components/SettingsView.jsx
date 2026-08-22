@@ -5,11 +5,11 @@ import {
 } from 'lucide-react';
 
 const SettingsView = () => {
-  const [activeTab, setActiveTab] = useState('AI & API');
+  const [activeTab, setActiveTab] = useState('General');
   const [saved, setSaved] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  const tabs = ['General', 'AI & API', 'Data Quality', 'Notifications', 'Security'];
+  const tabs = ['General', 'Integrations & Sync', 'Data Quality', 'Notifications', 'Security'];
 
   const handleSave = () => {
     if (!hasChanges) return;
@@ -70,7 +70,7 @@ const SettingsView = () => {
         {/* Tab Content Area */}
         <div className="py-2">
           {activeTab === 'General' && <GeneralSettings markChanged={markChanged} />}
-          {activeTab === 'AI & API' && <AIApiSettings markChanged={markChanged} />}
+          {activeTab === 'Integrations & Sync' && <AIApiSettings markChanged={markChanged} />}
           {activeTab === 'Data Quality' && <DataQualitySettings markChanged={markChanged} />}
           {activeTab === 'Notifications' && <NotificationSettings markChanged={markChanged} />}
           {activeTab === 'Security' && <SecuritySettings markChanged={markChanged} />}
@@ -176,66 +176,45 @@ const AIApiSettings = ({ markChanged }) => {
   return (
     <div className="space-y-6 animate-fade-in">
       
-      {/* AI & API Configuration Card */}
+      {/* Enterprise Data Sync Settings Card */}
       <div className="bg-white dark:bg-[#22272e] rounded-xl border border-slate-200 dark:border-[#2d333b] shadow-sm p-6">
         <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
-          <Key className="w-5 h-5 text-blue-500" /> AI & API Configuration
+          <RefreshCw className="w-5 h-5 text-indigo-500" /> Enterprise Data Sync
         </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Configure the AI services used by NEXORA for extraction, enrichment, and product intelligence.</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Configure automated synchronization with your primary ERP and CRM systems.</p>
         
         <div className="space-y-6 max-w-3xl">
-          {/* OpenAI API Key */}
+          {/* SAP Integration */}
           <div className="p-5 rounded-lg border border-slate-100 dark:border-[#2d333b] bg-slate-50/50 dark:bg-[#1c2128]">
             <div className="flex justify-between items-center mb-3">
-              <label className="text-sm font-bold text-slate-900 dark:text-white">OpenAI API Key (GPT-4o)</label>
+              <label className="text-sm font-bold text-slate-900 dark:text-white">SAP S/4HANA Connection</label>
               <span className="flex items-center gap-1.5 px-2 py-1 bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 rounded border border-teal-200 dark:border-teal-500/20 text-[10px] font-bold uppercase tracking-wider">
-                <div className="w-1.5 h-1.5 rounded-full bg-teal-500"></div> Connected
+                <div className="w-1.5 h-1.5 rounded-full bg-teal-500"></div> Synced
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Used for AI product enrichment, generating descriptions, and standardizing attributes.</p>
-            <div className="relative flex items-center">
-              <input 
-                type={showOpenAI ? "text" : "password"} 
-                defaultValue="sk-proj-xxxxxxxxxxxxxxxxxxxxxxxx" 
-                onChange={markChanged}
-                className="w-full pl-4 pr-12 py-2.5 text-sm bg-white dark:bg-[#22272e] border border-slate-200 dark:border-[#3d444d] rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900 dark:text-white font-mono" 
-              />
-              <button onClick={() => setShowOpenAI(!showOpenAI)} className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-                {showOpenAI ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Real-time bi-directional synchronization of product master data.</p>
+            <div className="flex gap-3">
+              <button className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#3d444d] rounded-lg hover:bg-slate-50 dark:hover:bg-[#2d333b] transition-all">
+                Configure Mapping
+              </button>
+              <button className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#3d444d] rounded-lg hover:bg-slate-50 dark:hover:bg-[#2d333b] transition-all">
+                View Sync Logs
               </button>
             </div>
           </div>
 
-          {/* LlamaParse API Key */}
+          {/* Salesforce Integration */}
           <div className="p-5 rounded-lg border border-slate-100 dark:border-[#2d333b] bg-slate-50/50 dark:bg-[#1c2128]">
             <div className="flex justify-between items-center mb-3">
-              <label className="text-sm font-bold text-slate-900 dark:text-white">LlamaParse API Key</label>
-              <span className="flex items-center gap-1.5 px-2 py-1 bg-slate-100 dark:bg-[#22272e] text-slate-500 dark:text-slate-400 rounded border border-slate-200 dark:border-[#3d444d] text-[10px] font-bold uppercase tracking-wider">
-                Not Connected
+              <label className="text-sm font-bold text-slate-900 dark:text-white">Salesforce Commerce Cloud</label>
+              <span className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded border border-amber-200 dark:border-amber-500/20 text-[10px] font-bold uppercase tracking-wider">
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-500"></div> Pending Sync
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Used for highly accurate parsing and extraction of complex PDF specification sheets.</p>
-            <div className="relative flex items-center">
-              <input 
-                type={showLlama ? "text" : "password"} 
-                placeholder="llx-..." 
-                onChange={markChanged}
-                className="w-full pl-4 pr-12 py-2.5 text-sm bg-white dark:bg-[#22272e] border border-slate-200 dark:border-[#3d444d] rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900 dark:text-white font-mono" 
-              />
-              <button onClick={() => setShowLlama(!showLlama)} className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-                {showLlama ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Push enriched product catalogs directly to your storefront.</p>
+             <button className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#3d444d] rounded-lg hover:bg-slate-50 dark:hover:bg-[#2d333b] transition-all">
+                Force Manual Sync
               </button>
-            </div>
-          </div>
-
-          <div>
-            <button 
-              onClick={handleTestConnection}
-              className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#3d444d] rounded-lg hover:bg-slate-50 dark:hover:bg-[#2d333b] transition-all flex items-center gap-2"
-            >
-              {testingConnection ? <RefreshCw className="w-4 h-4 animate-spin text-blue-500" /> : testSuccess ? <Check className="w-4 h-4 text-teal-500" /> : <BrainCircuit className="w-4 h-4" />}
-              {testingConnection ? "Testing Connection..." : testSuccess ? "Connection Successful" : "Test Connections"}
-            </button>
           </div>
         </div>
       </div>
