@@ -34,7 +34,7 @@ const CommandPalette = ({ isOpen, onClose, setActiveView }) => {
       ></div>
 
       {/* Modal */}
-      <div className="relative w-full max-w-2xl bg-industrial-800/90 border border-industrial-700/50 shadow-2xl rounded-sm overflow-hidden animate-modal-pop backdrop-blur-md">
+      <div className="relative w-full max-w-2xl bg-industrial-800/90 border border-industrial-700/50 shadow-2xl rounded-xl overflow-hidden animate-modal-pop backdrop-blur-md">
         
         {/* Search Input */}
         <div className="flex items-center px-4 py-3 border-b border-industrial-700/50 bg-industrial-900/50">
@@ -56,7 +56,7 @@ const CommandPalette = ({ isOpen, onClose, setActiveView }) => {
               <button
                 key={cmd.id}
                 onClick={() => handleSelect(cmd.id)}
-                className="flex items-center gap-3 px-3 py-3 rounded-sm hover:bg-industrial-700/50 text-slate-300 hover:text-white transition-colors w-full text-left group"
+                className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-industrial-700/50 text-slate-300 hover:text-white transition-colors w-full text-left group"
               >
                 <cmd.icon className="w-5 h-5 text-slate-400 group-hover:text-industrial-accent" />
                 <span className="font-medium">{cmd.label}</span>

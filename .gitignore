@@ -2,6 +2,17 @@ venv/
 __pycache__/
 *.pyc
 .env
+.env.*
+*.env
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
 node_modules/
 dist/
 .DS_Store
+.pytest_cache/
+scratch/
+*.log
+landing-reference/
+/package-lock.json

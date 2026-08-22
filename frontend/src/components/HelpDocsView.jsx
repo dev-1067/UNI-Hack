@@ -25,34 +25,23 @@ const HelpDocsView = () => {
           </div>
         </div>
 
-        {/* Advanced Pipeline Guide */}
-        <div className="glass-panel p-6 border-l-4 border-l-accent-cyan">
+        {/* FAQ Section */}
+        <div className="glass-panel p-6">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-            <Cpu className="w-5 h-5 text-accent-cyan" /> Autonomous Web Grounding Pipeline
+            <HelpCircle className="w-5 h-5 text-industrial-warning" /> Frequently Asked Questions
           </h2>
           <div className="space-y-6">
-            <div className="bg-cmd-900/50 p-4 rounded-sm border border-white/5">
-              <h4 className="text-white font-bold mb-2 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-accent-cyan/20 text-accent-cyan flex items-center justify-center text-xs">1</span>
-                Vision-Language Parsing
-              </h4>
-              <p className="text-sm text-slate-400">The pipeline intercepts unstructured PDF catalogs and raw images. Using spatial reasoning, the AI extracts the base SKU parameters even from heavily nested tables and fuzzy marketing text.</p>
+            <div>
+              <h4 className="text-white font-bold mb-1">What does "Zero-Hallucination" mean?</h4>
+              <p className="text-sm text-slate-400">Our AI uses Web Search Grounding (Tavily API) combined with strict Pydantic List of Values (LOV) validation to ensure no fake dimensions or metrics are ever output into the final CSV.</p>
             </div>
-            
-            <div className="bg-cmd-900/50 p-4 rounded-sm border border-white/5">
-              <h4 className="text-white font-bold mb-2 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-industrial-warning/20 text-industrial-warning flex items-center justify-center text-xs">2</span>
-                Live Web Search Grounding
-              </h4>
-              <p className="text-sm text-slate-400">Missing attributes (like electrical phase, max RPM, or blade thickness) trigger automated web queries. The agent cross-references manufacturer sites in real-time, effectively eliminating manual data entry.</p>
+            <div>
+              <h4 className="text-white font-bold mb-1">How is the 252-column CSV generated?</h4>
+              <p className="text-sm text-slate-400">The FastAPI backend (`backend/api.py`) receives the 50 core attributes from the AI Agent, maps them to the correct taxonomy, normalizes units (e.g. 1/2" to 0.5in), and pads the remaining 202 columns with empty strings.</p>
             </div>
-
-            <div className="bg-cmd-900/50 p-4 rounded-sm border border-white/5">
-              <h4 className="text-white font-bold mb-2 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-industrial-success/20 text-industrial-success flex items-center justify-center text-xs">3</span>
-                Pydantic Strict Typing & Export
-              </h4>
-              <p className="text-sm text-slate-400">Extracted data is passed through rigorous backend validation rules (LOVs). Once verified, the data is seamlessly structured into the standard 252-column e-commerce format for final ERP ingestion.</p>
+            <div>
+              <h4 className="text-white font-bold mb-1">Where is the code?</h4>
+              <p className="text-sm text-slate-400">The entire architecture is located in the local codebase. The Frontend is in `frontend/`, Backend is in `backend/`, and the AI Orchestrator is in `ai_agent/`.</p>
             </div>
           </div>
         </div>

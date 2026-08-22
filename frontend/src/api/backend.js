@@ -19,19 +19,7 @@ export const processProduct = async (partNum, partDesc, brand) => {
     });
     return response.data;
   } catch (error) {
-    console.warn("Backend not reachable. Falling back to mock data for demo.");
-    return {
-      status: "success",
-      metadata: { processing_time: 1.2 },
-      extracted_data: {
-        BRAND: "Diablo",
-        MANUFACTURER: "Freud",
-        PRODUCT_TYPE: "Saw Blade",
-        MATERIAL: "Carbide",
-        DIAMETER: "5-3/8 in."
-      },
-      missing_fields: ["RPM", "KERF"],
-      confidence_score: 95.5
-    };
+    console.error("Backend Error:", error);
+    throw error;
   }
 };

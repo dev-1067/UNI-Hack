@@ -1,97 +1,127 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi import FastAPI, Request, HTTPException, status, UploadFile, File, Form
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional, Dict, Any
 
-from ai_agent.pipeline import run_agent_pipeline
-from backend.schema import UnihackCatalogRecord, export_to_252_columns
-from backend.normalization import (
-    normalize_brand, 
-    classify_product, 
-    normalize_units,
-    generate_descriptions
+from backend.config import settings
+from backend.routes import (
+    auth,
+    products,
+    catalog,
+    quality,
+    enrichment,
+    integrations,
+    reports,
+    activity,
+    dashboard
 )
-
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
-    title="AI Product Intelligence Agent API",
-    description="Backend for the UniHack 2026 Industrial Commerce pipeline.",
-    version="1.0.0"
+    title=settings.PROJECT_NAME,
+    description="Backend API and AI Product Intelligence Engine for the NEXORA Industrial Commerce platform.",
+    version=settings.VERSION,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json"
 )
 
+# --- CORS Middleware ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ORIGINS if settings.CORS_ORIGINS != ["*"] else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-class ProcessRequest(BaseModel):
-    mfg_part_num: str
-    part_desc: str
-    e1_brand: str = ""
-    unilog_brand: str = ""
-    dib_brand: str = ""
-    part_manuf: str = ""
-    pdf_path: Optional[str] = None
-
-@app.post("/api/process", summary="Process a product into a 252-column CSV record")
-async def process_product(request: ProcessRequest) -> Dict[str, Any]:
-    """
-    Main endpoint that orchestrates the entire 7-step pipeline.
-    """
-    try:
-        raw_ai_record = run_agent_pipeline(
-            mfg_part_num=request.mfg_part_num,
-            part_desc=request.part_desc,
-            part_manuf=request.part_manuf,
-            pdf_path=request.pdf_path
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"AI Pipeline failed: {str(e)}")
-        
-    if not raw_ai_record:
-        raise HTTPException(status_code=404, detail="No data could be extracted.")
-
-    # 1. Base initialization from Request and AI Record
-    record = UnihackCatalogRecord(
-        MFR_URL=raw_ai_record.ref_url,
-        Ref_URL_1=raw_ai_record.ref_url,
-        PART_NUMBER=request.mfg_part_num,
-        Mfg_Part_Num=request.mfg_part_num,
-        Part_Desc=request.part_desc
+# --- Centralized Exception Handlers ---
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "error": {
+                "code": f"HTTP_{exc.status_code}",
+                "message": exc.detail
+            }
+        }
     )
-    
-    # 2. Brand Normalization
-    # Determine the best brand string to use (fallback logic)
-    raw_brand = request.e1_brand if request.e1_brand and request.e1_brand != "-- Unbranded --" else request.part_manuf
-    clean_brand = normalize_brand(raw_brand)
-    record.brand = clean_brand
-    record.manufacturer = normalize_brand(request.part_manuf)
-    
-    # 3. Category Classification
-    dept, class_name, fine = classify_product(
-        part_number=request.mfg_part_num, 
-        text_content=f"{request.part_desc} {str(raw_ai_record.attributes)}"
-    )
-    record.dept = dept
-    record.class_name = class_name
-    record.fine = fine
-    
-    # 4. Unit Normalization
-    clean_attributes = normalize_units(raw_ai_record.attributes)
-    record.attributes = clean_attributes
-    
-    # 5. Fixed Description Templates
-    record = generate_descriptions(record)
-    
-    # 6. Export to 252-column format
-    final_output = export_to_252_columns(record)
-    
-    return final_output
 
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = []
+    for err in exc.errors():
+        loc = " -> ".join(str(l) for l in err.get("loc", []))
+        errors.append(f"{loc}: {err.get('msg', 'Invalid value')}")
+    
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={
+            "success": False,
+            "error": {
+                "code": "VALIDATION_ERROR",
+                "message": "Request validation failed",
+                "details": errors
+            }
+        }
+    )
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    # Log internal error on server without leaking details or secrets to client
+    print(f"❌ Internal Server Error: {str(exc)}")
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "success": False,
+            "error": {
+                "code": "INTERNAL_SERVER_ERROR",
+                "message": "An unexpected error occurred during processing."
+            }
+        }
+    )
+
+# --- Include Modular API Routers ---
+app.include_router(auth.router, prefix=settings.API_PREFIX)
+app.include_router(products.router, prefix=settings.API_PREFIX)
+app.include_router(catalog.router, prefix=settings.API_PREFIX)
+app.include_router(quality.router, prefix=settings.API_PREFIX)
+app.include_router(enrichment.router, prefix=settings.API_PREFIX)
+app.include_router(integrations.router, prefix=settings.API_PREFIX)
+app.include_router(reports.router, prefix=settings.API_PREFIX)
+app.include_router(activity.router, prefix=settings.API_PREFIX)
+app.include_router(dashboard.router, prefix=settings.API_PREFIX)
+
+# --- Backward Compatible Endpoints (Direct Aliases) ---
+@app.post("/api/process", summary="Process a product into a 252-column CSV record (Legacy Alias)", tags=["Catalog Workspace"])
+async def process_product_legacy(request: catalog.CatalogProcessRequest):
+    return await catalog.process_catalog_json(request)
+
+@app.post("/api/process-file", summary="Upload a document for AI extraction (Legacy Alias)", tags=["Catalog Workspace"])
+async def process_file_legacy(
+    file: UploadFile = File(...),
+    mfg_part_num: Optional[str] = Form(None),
+    part_desc: Optional[str] = Form(None),
+    part_manuf: Optional[str] = Form(None)
+):
+    return await catalog.process_catalog_file(
+        file=file,
+        mfg_part_num=mfg_part_num,
+        part_desc=part_desc,
+        part_manuf=part_manuf
+    )
+
+# --- Health Check Endpoint ---
+@app.get("/health", summary="API Health Check", tags=["Health"])
+def health_check() -> Dict[str, str]:
+    from backend.database import check_database_connection
+    db_status = check_database_connection()
+    return {
+        "status": "healthy",
+        "service": "nexora-api",
+        "version": settings.VERSION,
+        "database": db_status
+    }
 
