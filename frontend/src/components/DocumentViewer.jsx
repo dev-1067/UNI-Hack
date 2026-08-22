@@ -16,10 +16,10 @@ const DocumentViewer = ({ isProcessing }) => {
   };
 
   return (
-    <div className={`flex-1 glass-panel flex flex-col overflow-hidden m-4 mt-0 transition-all duration-500 ${isProcessing ? 'border-industrial-accent animate-pulse-glow' : 'border-industrial-600/50'}`}>
+    <div className={`flex-1 w-full h-full glass-panel flex flex-col overflow-hidden m-0 transition-all duration-500 bg-white dark:bg-[#22272e] shadow-sm ${isProcessing ? 'border-blue-400 dark:border-blue-500 ring-1 ring-blue-400' : 'border-slate-200 dark:border-[#2d333b]'}`}>
       
       {/* Viewer Toolbar */}
-      <div className="bg-industrial-800/80 px-4 py-3 flex items-center justify-between border-b border-industrial-700/50 z-20">
+      <div className="bg-slate-50/50 dark:bg-[#1c2128] px-4 py-3 flex items-center justify-between border-b border-slate-100 dark:border-[#2d333b] z-20">
         <div className="flex items-center gap-2 text-slate-300">
           {isProcessing ? (
             <Scan className="w-5 h-5 text-industrial-accent animate-pulse" />
@@ -49,8 +49,8 @@ const DocumentViewer = ({ isProcessing }) => {
         {/* Mind-Blowing Laser Scan Overlay */}
         {isProcessing && (
           <div className="absolute inset-0 overflow-hidden pointer-events-none z-30">
-            <div className="absolute left-0 right-0 h-1 bg-industrial-accent shadow-[0_0_20px_5px_rgba(56,189,248,0.7)] animate-laser"></div>
-            <div className="absolute inset-0 bg-industrial-accent/5 animate-pulse"></div>
+            <div className="absolute left-0 right-0 h-1 bg-blue-500 shadow-[0_0_20px_5px_rgba(59,130,246,0.7)] animate-laser"></div>
+            <div className="absolute inset-0 bg-blue-500/5 animate-pulse"></div>
           </div>
         )}
 

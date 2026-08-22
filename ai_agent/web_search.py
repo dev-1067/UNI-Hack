@@ -1,6 +1,10 @@
 import os
 import json
-from tavily import TavilyClient
+
+try:
+    from tavily import TavilyClient
+except ImportError:
+    TavilyClient = None
 
 CACHE_FILE = "search_cache.json"
 
@@ -32,8 +36,9 @@ def exact_web_search(part_number: str, brand: str) -> dict:
     
     # 2. Live Web Search fallback
     tavily_api_key = os.getenv("TAVILY_API_KEY")
-    if not tavily_api_key:
-        raise ValueError("TAVILY_API_KEY environment variable is missing.")
+    if not tavily_api_key or TavilyClient is None:
+        print("⚠️ Tavily API Key missing or client not installed, continuing without live web grounding.")
+        return {"content": "", "url": f"https://example.com/{brand}/{part_number}"}
         
     client = TavilyClient(api_key=tavily_api_key)
     

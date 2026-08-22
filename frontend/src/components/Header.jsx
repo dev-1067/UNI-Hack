@@ -1,91 +1,118 @@
-import React, { useState } from 'react';
-import { Search, ShieldCheck, Bell, Moon, Sun, Activity } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, HelpCircle, Bell, User, Sun, Moon, Menu, Settings, LogOut } from 'lucide-react';
+import { useToast } from './ToastProvider';
 
-const Header = ({ onOpenCommandPalette, theme, toggleTheme }) => {
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+const Header = ({ onOpenCommandPalette, theme, toggleTheme, onToggleSidebar, setActiveView, mockUser, onLogout }) => {
+  const { addToast } = useToast();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef(null);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   return (
-    <header className="h-16 bg-industrial-900 border-b border-industrial-800 flex items-center justify-between px-6 z-40 relative transition-colors duration-500">
+    <header className="h-16 bg-[#f8f9fc] dark:bg-[#1a1f26] border-b border-slate-200 dark:border-[#2d333b] flex items-center px-6 z-40 relative transition-colors duration-300">
       
-      {/* Left Area: Context / Title */}
-      <div className="flex items-center gap-3">
-        <h1 className="text-lg font-bold text-white tracking-tight">AI Product Intelligence</h1>
-        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-industrial-success/10 border border-industrial-success/20">
-          <ShieldCheck className="w-3.5 h-3.5 text-industrial-success" />
-          <span className="text-[10px] font-black uppercase tracking-wider text-industrial-success">Zero-Hallucination</span>
-        </div>
-      </div>
-      
-      {/* Center Area: Expanding Command Bar */}
-      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md hidden md:block">
+      {/* Left: Search Bar & Mobile Menu */}
+      <div className="flex-1 flex items-center gap-2 md:gap-4">
+        <button 
+          onClick={onToggleSidebar}
+          className="md:hidden p-1 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
         <div 
           onClick={onOpenCommandPalette}
-          className="relative flex items-center bg-industrial-800 border border-industrial-700 hover:border-industrial-accent hover:shadow-[0_0_20px_rgba(56,189,248,0.2)] hover:scale-[1.02] rounded-lg transition-all duration-300 ease-out cursor-pointer"
+          className="relative flex items-center w-full max-w-xs bg-white dark:bg-[#22272e] border border-slate-200 dark:border-[#2d333b] hover:border-slate-300 dark:hover:border-blue-500/50 rounded-md transition-colors cursor-pointer group shadow-sm"
         >
-          <Search className="absolute left-3 w-4 h-4 text-slate-400" />
-          <div className="w-full bg-transparent border-none outline-none text-sm text-slate-400 py-2.5 pl-10 pr-12">
-            Search commands, parts, or press Ctrl+K...
-          </div>
-          <div className="absolute right-3 flex items-center gap-1 opacity-50">
-            <kbd className="px-1.5 py-0.5 bg-industrial-900 border border-industrial-700 rounded text-[10px] text-white font-mono">Ctrl</kbd>
-            <kbd className="px-1.5 py-0.5 bg-industrial-900 border border-industrial-700 rounded text-[10px] text-white font-mono">K</kbd>
+          <Search className="absolute left-3 w-3.5 h-3.5 text-slate-400 group-hover:text-slate-500 dark:group-hover:text-slate-300 transition-colors" />
+          <div className="w-full bg-transparent border-none outline-none text-xs text-slate-400 dark:text-slate-500 py-2 pl-9 pr-4 whitespace-nowrap overflow-hidden text-ellipsis">
+            Search...
           </div>
         </div>
       </div>
-
-      {/* Right Area: Actions */}
-      <div className="flex items-center gap-4 relative">
+      {/* Right: Actions */}
+      <div className="flex-1 flex items-center justify-end gap-5">
         
-        {/* Theme Toggle */}
+        {/* Theme Toggle Button */}
         <button 
           onClick={toggleTheme}
-          className="p-2 hover:bg-industrial-800 rounded-full transition-colors text-slate-400 hover:text-white"
-          title="Toggle Light/Dark Mode"
+          className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" 
+          title="Toggle Theme"
         >
-          {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
 
-        {/* Notification Bell */}
-        <button 
-          onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-          className="relative p-2 hover:bg-industrial-800 rounded-full transition-colors text-slate-400 hover:text-white group"
-        >
-          <Bell className="w-5 h-5 group-hover:animate-pulse" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-industrial-accent rounded-full shadow-[0_0_5px_#38BDF8]"></span>
+        <button onClick={() => setActiveView('help')} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors hidden sm:block" title="Help & Support">
+          <HelpCircle className="w-4 h-4" />
         </button>
+        
+        <button onClick={() => addToast('You have no new notifications.', 'info')} className="relative text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+          <Bell className="w-4 h-4" />
+          <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-red-500 rounded-full border border-white dark:border-[#1a1f26]"></span>
+        </button>
+        
+        {/* Profile Dropdown */}
+        <div className="relative" ref={profileRef}>
+          <button 
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            className={`w-8 h-8 rounded-full border flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
+              isProfileOpen 
+                ? 'bg-slate-300 border-slate-400 dark:bg-[#3d444d] dark:border-slate-500' 
+                : 'bg-slate-200 border-slate-300 dark:bg-[#2d333b] dark:border-slate-700 hover:bg-slate-300 dark:hover:bg-[#3d444d]'
+            }`}
+          >
+            {mockUser?.avatar ? (
+              <img src={mockUser.avatar} alt="Profile" className="w-full h-full rounded-full object-cover" />
+            ) : (
+              <User className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+            )}
+          </button>
 
-        {/* Notifications Dropdown */}
-        {isNotificationsOpen && (
-          <div className="absolute top-full right-0 mt-2 w-72 bg-industrial-800 border border-industrial-700 shadow-2xl rounded-xl overflow-hidden animate-fade-in z-50">
-            <div className="p-3 border-b border-industrial-700 bg-industrial-900/50 flex justify-between items-center">
-              <span className="text-sm font-bold text-white">Notifications</span>
-              <span className="text-[10px] px-2 py-0.5 bg-industrial-accent/20 text-industrial-accent rounded-full font-bold">2 New</span>
-            </div>
-            <div className="max-h-64 overflow-y-auto">
-              <div className="p-3 border-b border-industrial-700/50 hover:bg-industrial-700/30 transition-colors cursor-pointer flex gap-3">
-                <div className="mt-0.5 p-1.5 bg-industrial-success/20 rounded-full shrink-0">
-                  <Activity className="w-4 h-4 text-industrial-success" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white mb-0.5">AI Engine Connected</p>
-                  <p className="text-xs text-slate-400">FastAPI backend is ready.</p>
-                  <p className="text-[10px] text-slate-500 mt-1 font-mono">Just now</p>
-                </div>
+          {isProfileOpen && (
+            <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#22272e] border border-slate-200 dark:border-[#3d444d] shadow-xl rounded-lg overflow-hidden z-50">
+              <div className="p-3 border-b border-slate-100 dark:border-[#2d333b] bg-slate-50/50 dark:bg-[#1c2128]">
+                <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{mockUser?.name || 'User'}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{mockUser?.email || 'user@example.com'}</p>
               </div>
-              <div className="p-3 hover:bg-industrial-700/30 transition-colors cursor-pointer flex gap-3">
-                <div className="mt-0.5 p-1.5 bg-industrial-accent/20 rounded-full shrink-0">
-                  <ShieldCheck className="w-4 h-4 text-industrial-accent" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white mb-0.5">System Boot Successful</p>
-                  <p className="text-xs text-slate-400">All neural networks initialized.</p>
-                  <p className="text-[10px] text-slate-500 mt-1 font-mono">2 mins ago</p>
-                </div>
+              <div className="p-1">
+                <button 
+                  onClick={() => { setActiveView('profile'); setIsProfileOpen(false); }}
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#2d333b] rounded-md transition-colors flex items-center gap-2"
+                >
+                  <User className="w-4 h-4" /> Profile
+                </button>
+                <button 
+                  onClick={() => { setActiveView('settings'); setIsProfileOpen(false); }}
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#2d333b] rounded-md transition-colors flex items-center gap-2"
+                >
+                  <Settings className="w-4 h-4" /> Settings
+                </button>
+                <button 
+                  onClick={() => { setActiveView('help'); setIsProfileOpen(false); }}
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#2d333b] rounded-md transition-colors flex items-center gap-2"
+                >
+                  <HelpCircle className="w-4 h-4" /> Help & Support
+                </button>
+              </div>
+              <div className="p-1 border-t border-slate-100 dark:border-[#2d333b]">
+                <button 
+                  onClick={() => { onLogout(); setIsProfileOpen(false); }}
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md transition-colors flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" /> Sign out
+                </button>
               </div>
             </div>
-          </div>
-        )}
-
+          )}
+        </div>
       </div>
     </header>
   );

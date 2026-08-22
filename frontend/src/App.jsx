@@ -3,25 +3,115 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DocumentViewer from './components/DocumentViewer';
 import DataReviewer from './components/DataReviewer';
+import CatalogWorkspace from './pages/CatalogWorkspace';
+import DataQuality from './pages/DataQuality';
+import AIEnrichment from './pages/AIEnrichment';
+import Integrations from './pages/Integrations';
+import Reports from './pages/Reports';
+import Activity from './pages/Activity';
+import Profile from './pages/Profile';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import SettingsView from './components/SettingsView';
 import HelpDocsView from './components/HelpDocsView';
 import CommandPalette from './components/CommandPalette';
 import SplashScreen from './components/SplashScreen';
 import LoginView from './components/LoginView';
-import { processProduct } from './api/backend';
-import { Bot } from 'lucide-react';
+import SignupView from './components/SignupView';
+import Products from './pages/Products';
+import ProductDetail from './pages/ProductDetail';
+import AddProduct from './pages/AddProduct';
+import EditProduct from './pages/EditProduct';
+import ErrorBoundary from './components/ErrorBoundary';
+import LandingPage from './pages/LandingPage';
+import { apiClient } from './services/apiClient';
 
 function App() {
   const [appLoaded, setAppLoaded] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [theme, setTheme] = useState('dark'); // 'dark' | 'light'
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return sessionStorage.getItem('nexora_auth') === 'true' || !!sessionStorage.getItem('nexora_token');
+  });
+  const [authScreen, setAuthScreen] = useState(() => {
+    const hash = window.location.hash.replace(/^#\/?/, '');
+    if (hash === 'login') return 'login';
+    if (hash === 'signup') return 'signup';
+    return 'landing';
+  });
+  const [theme, setTheme] = useState('light'); // 'dark' | 'light'
   
-  const [activeView, setActiveView] = useState('dashboard'); // 'dashboard' | 'catalogs' | 'settings' | 'help'
+  // Real authenticated user state (derived from FastAPI -> Supabase)
+  const [currentUser, setCurrentUser] = useState(() => {
+    const saved = sessionStorage.getItem('nexora_user');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return {
+      name: 'Alex Morgan',
+      email: 'alex@nexora.ai',
+      role: 'Administrator',
+      company: 'NEXORA Industrial Corp',
+      avatar: null
+    };
+  });
+
+  const mockUser = currentUser; // Alias for components accepting mockUser prop
+
+
+  // Verify and refresh session on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      const token = sessionStorage.getItem('nexora_token');
+      if (token) {
+        try {
+          const userProfile = await apiClient.getCurrentUser();
+          if (userProfile && userProfile.email) {
+            setCurrentUser(userProfile);
+            sessionStorage.setItem('nexora_user', JSON.stringify(userProfile));
+            setIsAuthenticated(true);
+          }
+        } catch (e) {
+          console.warn("Session expired or unreachable:", e);
+        }
+      }
+    };
+    checkSession();
+  }, []);
+
+  const [activeView, setActiveView] = useState(() => {
+    const hash = window.location.hash.replace(/^#\/?/, '');
+    return hash || 'dashboard';
+  });
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  const [aiData, setAiData] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  // Sync URL hash with activeView only when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      window.location.hash = `/${activeView}`;
+      setIsSidebarOpen(false); // Close sidebar on navigation (mobile)
+    }
+  }, [activeView, isAuthenticated]);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace(/^#\/?/, '');
+      if (!isAuthenticated) {
+        if (hash === 'login') {
+          setAuthScreen('login');
+        } else if (hash === 'signup') {
+          setAuthScreen('signup');
+        } else {
+          setAuthScreen('landing');
+          if (hash && hash !== 'login' && hash !== 'signup') {
+            window.location.hash = 'login';
+          }
+        }
+      } else {
+        if (hash) setActiveView(hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [isAuthenticated]);
 
   // Ctrl+K Listener
   useEffect(() => {
@@ -35,12 +125,12 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Theme effect
+  // Theme effect (add 'dark' class to html element)
   useEffect(() => {
-    if (theme === 'light') {
-      document.documentElement.classList.add('light');
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
     } else {
-      document.documentElement.classList.remove('light');
+      document.documentElement.classList.remove('dark');
     }
   }, [theme]);
 
@@ -48,92 +138,115 @@ function App() {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
-  const handleProcessAI = async () => {
-    setIsProcessing(true);
-    try {
-      const result = await processProduct(
-        "DCB518ASTS06G", 
-        "Diablo Steel Demon 5-3/8 in. x 50-Teeth Thick Metal Cutting Saw Blade", 
-        "Diablo"
-      );
-      setAiData(result);
-    } catch (error) {
-      alert("Backend not reachable. Ensure FastAPI is running on port 8000.");
-      console.error(error);
-    } finally {
-      setIsProcessing(false);
+  const handleLogin = async (email, password) => {
+    const res = await apiClient.login(email, password);
+    if (res && res.data?.user) {
+      setCurrentUser(res.data.user);
+      sessionStorage.setItem('nexora_user', JSON.stringify(res.data.user));
     }
+    setIsAuthenticated(true);
+    setActiveView('dashboard');
+    window.location.hash = 'dashboard';
   };
 
-  const handleApprove = () => {
-    setAiData(null);
+  const handleSignup = async (name, email, password) => {
+    const res = await apiClient.signup(name, email, password);
+    if (res && res.data?.user) {
+      setCurrentUser(res.data.user);
+      sessionStorage.setItem('nexora_user', JSON.stringify(res.data.user));
+    }
+    setIsAuthenticated(true);
+    setActiveView('dashboard');
+    window.location.hash = 'dashboard';
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await apiClient.logout();
+    sessionStorage.removeItem('nexora_user');
     setIsAuthenticated(false);
     setActiveView('dashboard');
+    setAuthScreen('login');
+    window.location.hash = 'login';
   };
+
+
 
   // Render the correct view based on Sidebar/Command Palette selection
   const renderView = () => {
+    if (activeView.startsWith('products/')) {
+      const productId = activeView.split('/')[1];
+      if (productId === 'new') {
+        return <AddProduct />;
+      } else if (productId === 'edit') {
+        const editId = activeView.split('/')[2];
+        return <EditProduct productId={editId} />;
+      }
+      return <ProductDetail productId={productId} />;
+    }
+
     switch (activeView) {
       case 'dashboard':
-        return <AnalyticsDashboard />;
+        return <AnalyticsDashboard setActiveView={setActiveView} mockUser={currentUser} />;
+
       case 'settings':
         return <SettingsView />;
+      case 'profile':
+        return <Profile setActiveView={setActiveView} mockUser={currentUser} onLogout={handleLogout} />;
       case 'help':
         return <HelpDocsView />;
+      case 'products':
+        return <Products />;
+      case 'quality':
+        return <DataQuality setActiveView={setActiveView} />;
+      case 'enrichment':
+        return <AIEnrichment setActiveView={setActiveView} />;
+      case 'reports':
+        return <Reports setActiveView={setActiveView} mockUser={currentUser} />;
+      case 'activity':
+        return <Activity setActiveView={setActiveView} mockUser={currentUser} />;
+      case 'catalog':
       case 'catalogs':
+        return <CatalogWorkspace />;
+      case 'integrations':
+        return <Integrations setActiveView={setActiveView} />;
       default:
-        return (
-          <>
-            {/* Action Toolbar */}
-            <div className="px-6 py-4 flex justify-between items-center border-b border-industrial-800/50 bg-industrial-900/40">
-              <div>
-                <h2 className="text-xl font-bold text-white mb-1">Parts Extraction Workspace</h2>
-                <p className="text-xs text-slate-400 font-medium">Queue: <span className="text-industrial-accent">1 document pending</span></p>
-              </div>
-              
-              <button 
-                onClick={handleProcessAI}
-                disabled={isProcessing || aiData !== null}
-                className="tactile-button flex items-center gap-2 bg-industrial-accent text-industrial-900 font-black px-6 py-2.5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(56,189,248,0.2)]"
-              >
-                <Bot className="w-5 h-5" />
-                {isProcessing ? "INITIALIZING AI..." : "PROCESS WITH AI"}
-              </button>
-            </div>
-
-            {/* Dual-Pane View */}
-            <div className="flex-1 flex p-4 gap-4 overflow-hidden relative">
-              <DocumentViewer isProcessing={isProcessing} />
-              <DataReviewer 
-                data={aiData} 
-                onApprove={handleApprove} 
-                isProcessing={isProcessing}
-              />
-            </div>
-          </>
-        );
+        if (activeView.startsWith('enrichment/')) {
+          const id = activeView.split('/')[1];
+          return <AIEnrichment setActiveView={setActiveView} preselectId={id} />;
+        }
+        return <AnalyticsDashboard setActiveView={setActiveView} mockUser={currentUser} />;
     }
   };
 
   return (
-    <div className={`theme-${theme} transition-colors duration-500`}>
+    <div className={`transition-colors duration-500`}>
       {!appLoaded && <SplashScreen onComplete={() => setAppLoaded(true)} />}
       
-      {/* If loaded but not authenticated, show Login Screen */}
+      {/* If loaded but not authenticated, show Landing/Login/Signup Screens */}
       {appLoaded && !isAuthenticated && (
-        <LoginView onLogin={() => setIsAuthenticated(true)} />
+        authScreen === 'landing' ? (
+          <LandingPage 
+            onNavigateLogin={() => { window.location.hash = 'login'; }} 
+            onNavigateSignup={() => { window.location.hash = 'signup'; }}
+          />
+        ) : authScreen === 'login' ? (
+          <LoginView 
+            onLogin={handleLogin} 
+            onNavigateSignup={() => { window.location.hash = 'signup'; }} 
+          />
+        ) : (
+          <SignupView 
+            onSignup={handleSignup} 
+            onNavigateLogin={() => { window.location.hash = 'login'; }} 
+          />
+        )
+
       )}
 
-      {/* The main app rendered behind the splash screen/login so it's ready when splash fades */}
-      <div className={`h-screen w-full flex bg-industrial-900 font-sans text-slate-200 overflow-hidden relative selection:bg-industrial-accent selection:text-white transition-opacity duration-1000 ${appLoaded && isAuthenticated ? 'opacity-100' : 'opacity-0'}`}>
-        
-        {/* World-Class Background Ambience */}
-        <div className="absolute inset-0 tech-grid pointer-events-none opacity-50"></div>
-        <div className="absolute top-0 right-0 w-[60%] h-[60%] rounded-full bg-industrial-accent/5 blur-[150px] pointer-events-none"></div>
 
+      {/* The main app rendered behind the splash screen/login so it's ready when splash fades */}
+      <div className={`h-screen w-full flex bg-[#f8f9fc] dark:bg-[#1a1f26] font-sans text-slate-800 dark:text-slate-200 overflow-hidden selection:bg-blue-600 selection:text-white transition-opacity duration-1000 ${appLoaded && isAuthenticated ? 'opacity-100 relative' : 'opacity-0 absolute inset-0 pointer-events-none -z-10'}`}>
+        
         {/* Global Modals */}
         <CommandPalette 
           isOpen={isCommandPaletteOpen} 
@@ -142,17 +255,34 @@ function App() {
         />
 
         {/* Global Layout: Left Sidebar */}
-        <Sidebar activeView={activeView} setActiveView={setActiveView} onLogout={handleLogout} />
+        <Sidebar 
+          activeView={activeView} 
+          setActiveView={setActiveView} 
+          onLogout={handleLogout} 
+          isOpen={isSidebarOpen}
+          setIsOpen={setIsSidebarOpen}
+          mockUser={mockUser}
+        />
 
         {/* Global Layout: Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 relative z-10">
+        <div className="flex-1 flex flex-col min-w-0 relative z-10 bg-[#f8f9fc] dark:bg-[#1a1f26]">
           
           {/* Top Header / Taskbar */}
-          <Header onOpenCommandPalette={() => setIsCommandPaletteOpen(true)} theme={theme} toggleTheme={toggleTheme} />
+          <Header 
+            onOpenCommandPalette={() => setIsCommandPaletteOpen(true)} 
+            theme={theme} 
+            toggleTheme={toggleTheme} 
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            setActiveView={setActiveView}
+            mockUser={mockUser}
+            onLogout={handleLogout}
+          />
           
           {/* Main Workspace Area */}
-          <main className="flex-1 flex flex-col overflow-hidden bg-industrial-900/20 backdrop-blur-sm">
-            {renderView()}
+          <main className="flex-1 flex flex-col overflow-hidden bg-transparent">
+            <ErrorBoundary>
+              {renderView()}
+            </ErrorBoundary>
           </main>
         </div>
       </div>
